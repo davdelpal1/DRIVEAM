@@ -1,0 +1,47 @@
+# --- Entorno / secretos ---
+.env
+.env.*
+!.env.example
+*.local
+
+# --- Python / Django ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.sqlite3
+/backend/staticfiles/
+/backend/media/
+
+# --- Node / Next.js ---
+node_modules/
+.next/
+out/
+.turbo/
+next-env.d.ts
+*.tsbuildinfo
+/frontend/coverage/
+/frontend/playwright-report/
+/frontend/test-results/
+
+# --- Docker ---
+# (los volúmenes viven en Docker, no en el árbol)
+
+# --- Editores / SO ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp

@@ -1,0 +1,17 @@
+# Normaliza los finales de línea a LF dentro del repositorio.
+* text=auto eol=lf
+
+# Scripts que deben conservar su final de línea
+*.sh    text eol=lf
+*.bat   text eol=crlf
+*.ps1   text eol=crlf
+
+# Binarios frecuentes
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.pdf   binary
+*.woff  binary
+*.woff2 binary
