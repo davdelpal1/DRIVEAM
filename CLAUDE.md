@@ -6,7 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Estado del proyecto
 
-Este repositorio contiene **solo documentos de planificación** — no hay código, ni `frontend/`, ni `backend/`, ni `docker-compose.yml`, y todavía no es un repositorio git. La implementación no ha empezado; el primer trabajo es la **FASE 0** de [PLAN.md](PLAN.md) (montar el monorepo, el frontend Next.js, el backend Django, Docker Compose y CI).
+**FASE 0 completada.** El monorepo está montado y funcionando: backend Django + DRF con
+`GET /api/v1/health/` y OpenAPI, frontend Next.js 16 con la home de estado del stack, Docker
+Compose (`db` + `backend` + `frontend`) y CI en GitHub Actions. Arranque: `cp .env.example .env`
+&& `docker compose up --build`. Remoto: `github.com/davdelpal1/DRIVEAM`.
+
+**Siguiente:** FASE 1 de [PLAN.md](PLAN.md) — modelo de dominio (`Source`, `Seller`, `Vehicle`,
+`Listing`, `ListingSnapshot`, `FinanceOffer`, `Favorite`, `UserVehicleNote`, `UserPreference`,
+`Score`) y su API.
 
 Los cuatro documentos que son fuente de verdad, en orden de lectura:
 
@@ -22,14 +29,18 @@ La moneda es EUR; la financiación usa términos españoles (TIN, TAE, cuota, en
 Monorepo. Cliente web Next.js (TypeScript strict, Tailwind) → API Django REST Framework → PostgreSQL. Celery + Redis están **aplazados** y no deben aparecer hasta que una fase los necesite de verdad (ver PLAN.md FASE 10).
 
 ```
-frontend/            Next.js — organizar por feature, no un components/ plano
+frontend/            Next.js 16 (App Router) — organizar por feature, no un components/ plano
+  src/app/           rutas · src/components/ui/ sistema de componentes · src/lib/ (api.ts, cn.ts)
 backend/
-  config/            configuración del proyecto Django
-  apps/              una app por dominio: accounts, vehicles, listings, sources,
-                     favorites, comparisons, finance, scoring
-docs/decisions/      ADRs (Contexto / Decisión / Alternativas / Consecuencias)
-docs/data-sources/   un fichero por fuente externa (ver más abajo)
+  config/            proyecto Django: settings/{base,local,test,production}, urls, api_router
+  apps/              una app por dominio: accounts (User), core (health); luego vehicles,
+                     listings, sources, favorites, comparisons, finance, scoring
+docs/decisions/      ADRs 0001-0005 (Contexto / Decisión / Alternativas / Consecuencias)
+docs/data-sources/   un fichero por fuente externa (plantilla en _template.md)
 ```
+
+> Next.js 16 tiene cambios importantes respecto a versiones anteriores. Antes de tocar el
+> frontend, consulta `frontend/node_modules/next/dist/docs/` (ver `frontend/AGENTS.md`).
 
 Capas del backend: `View → Service/Use Case → Domain/Model → Repository/ORM`. Introduce una capa solo cuando la operación no sea trivial — no añadas ceremonia alrededor de un CRUD simple.
 
@@ -50,20 +61,35 @@ Conserva el valor original y el normalizado siempre que sea razonable (p. ej. `{
 - El **Car Score** es una ayuda a la decisión, 0–100, con un `breakdown` que debe *explicar* el número ("92 porque está por debajo del precio de mercado…", nunca un "92" a secas). Las fórmulas están versionadas (`scoring/engine.py`, `rules/`, `versions/`). La V1 son reglas deterministas; las versiones estadísticas/ML llegan mucho más tarde. Nunca uses IA generativa para inventar especificaciones o precios.
 - Los **cálculos de financiación deben ser deterministas y estar cubiertos por tests unitarios** — es obligatorio según PLAN.md FASE 6.
 
-## Herramientas (a configurar en la FASE 0)
+## Herramientas y comandos
 
-Nada de esto está montado todavía. Al hacer el scaffold, la cadena de herramientas prevista es:
+Todo se ejecuta **dentro de Docker** (el host no necesita Python ni Node; el Python local es 3.14,
+incompatible con Django 5.2).
 
 | | Backend | Frontend |
 |---|---|---|
-| Test | pytest, pytest-django | Vitest, Testing Library, Playwright (E2E) |
-| Lint | Ruff | ESLint |
-| Formato | Black (o equivalente) | Prettier |
-| Tipos | mypy (progresivo, no 100%) | TypeScript strict |
+| Test | `pytest` (pytest-django) | `npm run test` (Vitest + Testing Library; Playwright llegará en FASE 2) |
+| Lint | `ruff check .` | `npm run lint` (ESLint) |
+| Formato | `ruff format .` (sustituye a Black, ADR 0005) | `npm run format` (Prettier) |
+| Tipos | `mypy .` (progresivo, no 100%) | `npm run typecheck` (TypeScript strict) |
 
-El stack completo debe arrancar con `docker compose up` (frontend + backend + postgres) tras una configuración inicial documentada. No persigas una cobertura arbitraria; prioriza el código crítico (normalizadores, scoring, financiación, parsers, deduplicación).
+```bash
+docker compose up --build                                   # levanta db + backend + frontend
+docker compose run --rm backend pytest
+docker compose run --rm backend python manage.py makemigrations
+docker compose run --rm backend python manage.py migrate
+docker compose run --rm frontend npm run test
+```
 
-CI (GitHub Actions) en cada PR: frontend lint + typecheck + tests, backend lint + tests, comprobación de migraciones. `main` debe permanecer desplegable.
+Un solo test: `docker compose run --rm backend pytest apps/core/tests/test_health.py::test_health_devuelve_ok`
+· `docker compose run --rm frontend npm run test -- src/components/ui/button.test.tsx`.
+
+Atajos con `make` (opcional): `make up`, `make test`, `make lint`, `make check`, `make help`.
+
+No persigas una cobertura arbitraria; prioriza el código crítico (normalizadores, scoring,
+financiación, parsers, deduplicación). La CI (`.github/workflows/ci.yml`) ejecuta en cada PR:
+backend (ruff, mypy, `makemigrations --check`, pytest con Postgres) y frontend (eslint, tsc,
+vitest, build). `main` debe permanecer desplegable.
 
 ## Convenciones de trabajo
 

@@ -145,20 +145,22 @@ No se implementará inicialmente:
 
 ### Frontend web
 
-- Next.js
-- TypeScript
-- Tailwind CSS
+- Next.js 16 (App Router) · React 19
+- TypeScript (modo strict)
+- Tailwind CSS v4
 - componentes UI accesibles y reutilizables
+- ESLint · Prettier · Vitest
 
 ### Backend
 
-- Python
-- Django
-- Django REST Framework
+- Python 3.13
+- Django 5.2 LTS
+- Django REST Framework · drf-spectacular (OpenAPI)
+- Ruff (lint + formato) · mypy · pytest
 
 ### Base de datos
 
-- PostgreSQL
+- PostgreSQL 17
 
 ### Procesamiento asíncrono
 
@@ -193,23 +195,65 @@ Según cada fuente:
 
 ```text
 driveam/
-├── frontend/
-├── backend/
+├── frontend/            Next.js 16 + Tailwind
+├── backend/             Django 5.2 + DRF (config/ + apps/)
 ├── docs/
-│   ├── decisions/
+│   ├── decisions/       ADRs (0001-0005)
 │   ├── api/
 │   └── data-sources/
 ├── scripts/
-├── .github/
-│   └── workflows/
+├── .github/workflows/   ci.yml
 ├── docker-compose.yml
+├── Makefile
 ├── .env.example
-├── README.md
-├── PROJECT_VISION.md
-├── ARCHITECTURE.md
-├── PLAN.md
-└── CHANGELOG.md
+├── README.md · PROJECT_VISION.md · ARCHITECTURE.md · PLAN.md · CHANGELOG.md
+└── CLAUDE.md            guía para agentes de IA
 ```
+
+---
+
+## Puesta en marcha local
+
+Requisitos: **Docker** (con Docker Compose). No hace falta Python ni Node en el host.
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+| Servicio | URL |
+|---|---|
+| Frontend | http://localhost:3000 |
+| API — health | http://localhost:8000/api/v1/health/ |
+| API — documentación (Swagger UI) | http://localhost:8000/api/v1/schema/swagger-ui/ |
+| Admin de Django | http://localhost:8000/admin/ |
+
+La home muestra en verde el estado de los tres servicios cuando todo está conectado.
+
+Si el puerto 3000 u 8000 está ocupado, ajusta `FRONTEND_PORT` / `BACKEND_PORT` en `.env`.
+
+```bash
+docker compose run --rm backend python manage.py createsuperuser   # usuario admin
+docker compose run --rm backend python manage.py migrate           # migraciones
+```
+
+## Tests y calidad
+
+```bash
+# Backend
+docker compose run --rm backend ruff check .
+docker compose run --rm backend ruff format .
+docker compose run --rm backend mypy .
+docker compose run --rm backend pytest
+
+# Frontend
+docker compose run --rm frontend npm run lint
+docker compose run --rm frontend npm run typecheck
+docker compose run --rm frontend npm run test
+```
+
+Con `make` instalado: `make up`, `make test`, `make lint`, `make check` (ver `make help`).
+La CI de GitHub Actions ejecuta estas mismas comprobaciones en cada Pull Request.
 
 ---
 
@@ -316,7 +360,10 @@ Añadir:
 
 ## 10. Estado
 
-**Estado actual:** definición y planificación inicial.
+**Estado actual:** FASE 0 completada — monorepo, backend Django + DRF con
+`/api/v1/health/`, frontend Next.js, Docker Compose y CI operativos.
+
+**Siguiente:** FASE 1 — modelo de dominio (`Vehicle`, `Listing`, `Source`, …).
 
 Siguiente documento: [`PLAN.md`](./PLAN.md)
 

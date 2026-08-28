@@ -15,7 +15,7 @@ y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
     (`config/settings/{base,local,test,production}.py`) y endpoint `GET /api/v1/health/`.
   - Esquema OpenAPI con `drf-spectacular` en `/api/v1/schema/`.
   - App `accounts` con modelo `User` personalizado (`AUTH_USER_MODEL`), sin lógica de auth todavía.
-  - Frontend Next.js 15 (App Router, TypeScript strict) + Tailwind CSS v4, con una home que
+  - Frontend Next.js 16 (App Router, TypeScript strict) + Tailwind CSS v4, con una home que
     muestra el estado del stack consultando el health endpoint.
   - Tooling: Ruff (lint + formato) y mypy en el backend; ESLint + Prettier + Vitest en el frontend.
   - Orquestación local con Docker Compose (`db`, `backend`, `frontend`).

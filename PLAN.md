@@ -10,7 +10,9 @@ Regla principal:
 
 ---
 
-# FASE 0 — Fundación del proyecto
+# FASE 0 — Fundación del proyecto ✅
+
+> **Completada** (2026-08-28). Detalle en `CHANGELOG.md` y ADRs `docs/decisions/0001-0005`.
 
 ## Objetivo
 
@@ -18,69 +20,70 @@ Crear una base sólida que permita desarrollar sin acumular deuda técnica desde
 
 ### Repositorio
 
-- [ ] Crear repositorio GitHub.
-- [ ] Configurar rama `main`.
-- [ ] Añadir `.gitignore`.
-- [ ] Añadir `.editorconfig`.
-- [ ] Añadir `.env.example`.
-- [ ] Añadir `CHANGELOG.md`.
-- [ ] Añadir documentación inicial.
+- [x] Crear repositorio GitHub. _(remoto `davdelpal1/DRIVEAM` configurado como `origin`; `push` pendiente)_
+- [x] Configurar rama `main`.
+- [x] Añadir `.gitignore`. _(+ `.gitattributes` para normalizar LF)_
+- [x] Añadir `.editorconfig`.
+- [x] Añadir `.env.example`.
+- [x] Añadir `CHANGELOG.md`.
+- [x] Añadir documentación inicial. _(ADRs, plantillas de `docs/api` y `docs/data-sources`)_
 
 ### Estructura
 
-- [ ] Crear `/frontend`.
-- [ ] Crear `/backend`.
-- [ ] Crear `/docs`.
-- [ ] Crear `/scripts`.
-- [ ] Crear `/.github/workflows`.
+- [x] Crear `/frontend`.
+- [x] Crear `/backend`.
+- [x] Crear `/docs`.
+- [x] Crear `/scripts`.
+- [x] Crear `/.github/workflows`.
 
 ### Frontend
 
-- [ ] Inicializar Next.js.
-- [ ] TypeScript strict.
-- [ ] Configurar Tailwind.
-- [ ] Configurar ESLint.
-- [ ] Configurar Prettier.
-- [ ] Crear layout base.
-- [ ] Crear sistema inicial de componentes.
+- [x] Inicializar Next.js. _(v16, App Router, `src/`)_
+- [x] TypeScript strict. _(+ `noUncheckedIndexedAccess`)_
+- [x] Configurar Tailwind. _(v4)_
+- [x] Configurar ESLint.
+- [x] Configurar Prettier. _(+ plugin de Tailwind)_
+- [x] Crear layout base. _(`lang="es"`, mobile-first)_
+- [x] Crear sistema inicial de componentes. _(`src/components/ui/button.tsx` + `cn()`)_
 
 ### Backend
 
-- [ ] Inicializar Django.
-- [ ] Instalar Django REST Framework.
-- [ ] Configurar PostgreSQL.
-- [ ] Configurar variables de entorno.
-- [ ] Configurar pytest.
-- [ ] Configurar linting.
-- [ ] Crear `/api/v1/`.
-- [ ] Añadir endpoint `/health/`.
+- [x] Inicializar Django. _(5.2 LTS; `config/` + `apps/`)_
+- [x] Instalar Django REST Framework. _(+ drf-spectacular para OpenAPI)_
+- [x] Configurar PostgreSQL. _(17, vía `DATABASE_URL`)_
+- [x] Configurar variables de entorno. _(`django-environ`, settings por entorno)_
+- [x] Configurar pytest. _(pytest-django; 3 tests del health en verde)_
+- [x] Configurar linting. _(Ruff lint + formato, mypy con django-stubs)_
+- [x] Crear `/api/v1/`.
+- [x] Añadir endpoint `/health/`. _(`GET /api/v1/health/`, público, comprueba la BD)_
+- [x] Modelo `User` personalizado (`apps/accounts`) para fijar `AUTH_USER_MODEL` desde el inicio.
 
 ### Docker
 
-- [ ] Dockerfile frontend.
-- [ ] Dockerfile backend.
-- [ ] PostgreSQL.
-- [ ] `docker-compose.yml`.
-- [ ] Documentar arranque local.
+- [x] Dockerfile frontend. _(multi-target: development / build / production standalone)_
+- [x] Dockerfile backend. _(multi-target: development / production con gunicorn)_
+- [x] PostgreSQL.
+- [x] `docker-compose.yml`. _(puertos del host configurables)_
+- [x] Documentar arranque local. _(README §"Puesta en marcha local")_
 
 ### CI
 
-- [ ] GitHub Actions frontend lint.
-- [ ] Typecheck.
-- [ ] Backend lint.
-- [ ] Tests backend.
-- [ ] Build frontend.
+- [x] GitHub Actions frontend lint.
+- [x] Typecheck. _(`tsc --noEmit`)_
+- [x] Backend lint. _(ruff + `ruff format --check` + mypy + `makemigrations --check`)_
+- [x] Tests backend. _(pytest con servicio Postgres)_
+- [x] Build frontend. _(`next build`)_
 
 ### Definición de terminado
 
 ```text
 git clone
-→ configurar .env
-→ docker compose up
-→ frontend disponible
-→ backend disponible
-→ PostgreSQL conectado
-→ CI verde
+→ configurar .env               ✅ cp .env.example .env
+→ docker compose up              ✅ los 3 servicios arrancan
+→ frontend disponible            ✅ http://localhost:3000
+→ backend disponible             ✅ http://localhost:8000/api/v1/health/
+→ PostgreSQL conectado           ✅ health devuelve {"status":"ok","database":"ok"}
+→ CI verde                       ⏳ pendiente del primer push a GitHub
 ```
 
 ---
