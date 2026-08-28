@@ -19,9 +19,10 @@ CMD ["npm", "run", "dev"]
 
 # ============================================================
 # build — compila la salida `standalone`.
+# (sin NODE_ENV=production aquí: npm ci debe instalar devDependencies;
+#  `next build` ya fuerza producción en la salida)
 # ============================================================
 FROM base AS build
-ENV NODE_ENV=production
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
