@@ -135,8 +135,9 @@ Representar correctamente coches y anuncios antes de construir funcionalidades c
 - [x] paginación. _(`PageNumberPagination`, 20/página)_
 - [x] OpenAPI. _(esquema `drf-spectacular` sin avisos)_
 
-> Diferido a su fase por disciplina de hoja de ruta: endpoints de `UserPreference` (FASE 2),
-> `Favorite`/`UserVehicleNote` (FASE 3), escritura de `FinanceOffer` y cálculos (FASE 6),
+> Diferido a su fase por disciplina de hoja de ruta: endpoints de `UserPreference` (FASE 2, ✓),
+> `Favorite`/`UserVehicleNote` (FASE 3, ✓ — vía `/api/v1/candidates/`), escritura de
+> `FinanceOffer` y cálculos (FASE 6),
 > `Score` (FASE 7) y `ListingSnapshot` (FASE 9). Esos modelos existen ya con su admin.
 > Permisos provisionales: lectura pública, escritura autenticada (revisado en FASE 2).
 
@@ -213,32 +214,39 @@ Nuevo candidato
 
 Campos:
 
-- [ ] marca.
-- [ ] modelo.
-- [ ] versión.
-- [ ] combustible.
-- [ ] potencia.
-- [ ] año.
-- [ ] kilómetros.
-- [ ] precio contado.
-- [ ] precio financiado.
-- [ ] vendedor.
-- [ ] garantía.
-- [ ] ubicación.
-- [ ] URL.
-- [ ] notas.
+- [x] marca.
+- [x] modelo.
+- [x] versión.
+- [x] combustible.
+- [x] potencia.
+- [x] año.
+- [x] kilómetros.
+- [x] precio contado.
+- [x] precio financiado.
+- [x] vendedor.
+- [x] garantía.
+- [x] ubicación.
+- [x] URL.
+- [x] notas.
 
 ### Funciones
 
-- [ ] crear.
-- [ ] editar.
-- [ ] eliminar.
-- [ ] archivar.
-- [ ] favorito.
+- [x] crear.
+- [x] editar.
+- [x] eliminar.
+- [x] archivar.
+- [x] favorito.
 
 ### Definición de terminado
 
 El usuario puede sustituir una hoja de cálculo por la aplicación.
+
+**FASE 3 completada.** `Listing.owner` (nulable) + endpoint plano `GET·POST·PATCH·DELETE
+/api/v1/candidates/` en `apps/listings` con acciones `archive`/`unarchive`/`favorite`/
+`unfavorite` y capa de servicio (`apps/listings/services.py`). Frontend: `/candidatos`
+(listado con acciones), `/candidatos/nuevo`, `/candidatos/[id]/editar`; feature
+`src/features/candidates`. Fuente sintética `manual`, `Listing.archived_at`, `Listing.url`
+opcional. Ver `docs/decisions/0008` y `docs/data-sources/manual.md`.
 
 ---
 

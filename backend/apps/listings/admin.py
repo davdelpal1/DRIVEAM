@@ -18,10 +18,19 @@ class ListingSnapshotInline(admin.TabularInline):
 
 @admin.register(Listing)
 class ListingAdmin(admin.ModelAdmin):
-    list_display = ("__str__", "source", "status", "price_cash", "mileage_km", "created_at")
-    list_filter = ("status", "source", "province")
+    list_display = (
+        "__str__",
+        "source",
+        "owner",
+        "status",
+        "price_cash",
+        "mileage_km",
+        "archived_at",
+        "created_at",
+    )
+    list_filter = ("status", "source", "province", ("archived_at", admin.EmptyFieldListFilter))
     search_fields = ("title", "description", "url", "external_id")
-    autocomplete_fields = ("vehicle", "source", "seller")
+    autocomplete_fields = ("vehicle", "source", "seller", "owner")
     readonly_fields = ("created_at", "updated_at")
     inlines = (FinanceOfferInline, ListingSnapshotInline)
 

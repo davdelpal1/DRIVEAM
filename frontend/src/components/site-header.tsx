@@ -38,6 +38,12 @@ export function SiteHeader() {
           {status === "authenticated" && user ? (
             <>
               <Link
+                href="/candidatos"
+                className="text-zinc-600 hover:underline dark:text-zinc-300"
+              >
+                Candidatos
+              </Link>
+              <Link
                 href="/perfil"
                 className="text-zinc-600 hover:underline dark:text-zinc-300"
               >

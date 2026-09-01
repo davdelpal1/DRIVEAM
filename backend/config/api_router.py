@@ -7,7 +7,7 @@ preferencias, score) y las capturas de anuncio se registrarán en su fase corres
 
 from rest_framework.routers import DefaultRouter
 
-from apps.listings.api import ListingViewSet
+from apps.listings.api import CandidateViewSet, ListingViewSet
 from apps.sources.api import SellerViewSet, SourceViewSet
 from apps.vehicles.api import VehicleViewSet
 
@@ -16,6 +16,7 @@ router.register("sources", SourceViewSet, basename="source")
 router.register("sellers", SellerViewSet, basename="seller")
 router.register("vehicles", VehicleViewSet, basename="vehicle")
 router.register("listings", ListingViewSet, basename="listing")
+router.register("candidates", CandidateViewSet, basename="candidate")
 
 app_name = "api"
 urlpatterns = router.urls

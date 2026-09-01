@@ -10,6 +10,7 @@ nunca `0`; `raw_data` conserva el original sin normalizar pero no sustituye a lo
 estructurados.
 """
 
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
@@ -30,6 +31,15 @@ class Listing(TimestampedModel):
         verbose_name="fuente",
     )
     external_id = models.CharField("id externo", max_length=120, blank=True, default="")
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="owned_listings",
+        verbose_name="propietario",
+        help_text="Usuario que dio de alta el anuncio a mano; nulo para anuncios de otras fuentes.",
+    )
     vehicle = models.ForeignKey(
         Vehicle,
         on_delete=models.PROTECT,
@@ -44,7 +54,7 @@ class Listing(TimestampedModel):
         related_name="listings",
         verbose_name="vendedor",
     )
-    url = models.URLField("URL", max_length=500)
+    url = models.URLField("URL", max_length=500, blank=True, default="")
 
     title = models.CharField("título", max_length=300, blank=True)
     description = models.TextField("descripción", blank=True)
@@ -80,6 +90,7 @@ class Listing(TimestampedModel):
         choices=ListingStatus.choices,
         default=ListingStatus.ACTIVE,
     )
+    archived_at = models.DateTimeField("archivado el", null=True, blank=True)
     first_seen_at = models.DateTimeField("primera vez visto", default=timezone.now)
     last_seen_at = models.DateTimeField("última vez visto", default=timezone.now)
     published_at = models.DateTimeField("publicado el", null=True, blank=True)
