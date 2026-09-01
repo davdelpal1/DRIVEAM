@@ -102,6 +102,18 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+# El registro de nuevas cuentas por API se puede cerrar sin desplegar código.
+REGISTRATION_ENABLED = env.bool("DJANGO_REGISTRATION_ENABLED", default=True)
+
+# ------------------------------------------------------------------
+# Sesión y CSRF (auth por cookie de sesión, ver ADR 0007)
+# ------------------------------------------------------------------
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = env("DJANGO_SESSION_COOKIE_SAMESITE", default="Lax")
+CSRF_COOKIE_SAMESITE = env("DJANGO_CSRF_COOKIE_SAMESITE", default="Lax")
+# Orígenes del frontend autorizados a enviar peticiones de escritura (comprobación de `Origin`).
+CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS", default=[])
+
 # ------------------------------------------------------------------
 # Internacionalización
 # ------------------------------------------------------------------
@@ -122,6 +134,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Django REST Framework
 # ------------------------------------------------------------------
 REST_FRAMEWORK = {
+    "EXCEPTION_HANDLER": "apps.core.exceptions.exception_handler",
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -136,6 +149,12 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
+    # Límite en endpoints sensibles (login/registro). Usa el backend de caché por defecto
+    # (`LocMemCache`, por proceso); en producción con varios procesos hará falta caché compartida.
+    "DEFAULT_THROTTLE_RATES": {
+        "auth-login": "10/min",
+        "auth-register": "5/hour",
+    },
 }
 
 SPECTACULAR_SETTINGS = {
@@ -152,3 +171,5 @@ SPECTACULAR_SETTINGS = {
 # CORS (orígenes permitidos para llamar a la API desde el navegador)
 # ------------------------------------------------------------------
 CORS_ALLOWED_ORIGINS = env.list("DJANGO_CORS_ALLOWED_ORIGINS", default=[])
+# El frontend envía la cookie de sesión: se necesita allowlist explícita (nunca `*`) y credenciales.
+CORS_ALLOW_CREDENTIALS = True

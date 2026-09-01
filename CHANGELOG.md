@@ -9,6 +9,34 @@ y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
 ### Added
 
+- **FASE 2 — Autenticación y perfil.**
+  - Autenticación por sesión de Django (email + contraseña, sin `username`): endpoints
+    `auth/csrf/`, `auth/register/`, `auth/login/`, `auth/logout/`, `auth/me/` en `apps/accounts`,
+    hechos a mano. Registro con flag `DJANGO_REGISTRATION_ENABLED`; `login`/`register` con rate
+    limiting (`ScopedRateThrottle`). Endurecimiento de cookies de sesión/CSRF y
+    `CSRF_TRUSTED_ORIGINS` / `CORS_ALLOW_CREDENTIALS`.
+  - `GET·PUT·PATCH /api/v1/preferences/` — preferencias de compra del usuario (singleton
+    autocreado): presupuestos, año/kilómetros, combustibles, carrocerías y pesos `weight_*` del
+    Car Score (0–100).
+  - Revisión de permisos del catálogo (cierra deuda del ADR 0006): `Source` escribible solo por
+    `is_staff` (`IsAdminUserOrReadOnly` en `apps/core`); resto sin cambios.
+  - Frontend: páginas `/entrar`, `/registro` y `/perfil` (guard server-side + `proxy.ts`
+    optimista), `AuthProvider` + `SiteHeader`, cliente HTTP con cookie de sesión y `X-CSRFToken`
+    (`apiMutate`), reenvío de cookies en Server Components (`src/lib/server-api.ts`). Componente
+    `ui/input`. Features `auth/` y `preferences/`.
+  - Tests: 24 nuevos de backend (auth, preferencias, permisos, modelo `User`, manejador de
+    excepciones) y 7 de frontend; E2E con Playwright (Chromium) del flujo registro →
+    preferencias → logout, con job `e2e` en CI.
+  - ADR `docs/decisions/0007-autenticacion-y-sesion.md`.
+
+### Fixed
+
+- Mensaje de rate limiting (HTTP 429) en español natural ("Demasiados intentos. Vuelve a
+  intentarlo en N segundos.") mediante un `EXCEPTION_HANDLER` propio en `apps/core`, en lugar de
+  la traducción literal de DRF.
+- Formato Prettier de tres ficheros del frontend de la FASE 1 (`catalogo/page.tsx`,
+  `catalog/vehicle-list.tsx(.test)`).
+
 - **FASE 1 — Modelo de dominio.**
   - Apps de dominio: `sources`, `vehicles`, `listings`, `finance`, `favorites`, `scoring`
     (y `UserPreference` en `accounts`).

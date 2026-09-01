@@ -80,6 +80,8 @@ describe("VehicleList", () => {
 
     render(await VehicleList());
 
-    expect(screen.getByText(/No se pudo cargar el catálogo/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/No se pudo cargar el catálogo/),
+    ).toBeInTheDocument();
   });
 });

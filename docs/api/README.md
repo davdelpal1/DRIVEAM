@@ -22,12 +22,27 @@ El esquema es la fuente de verdad del contrato; no se mantiene documentación de
 - Validación estricta de entrada; los campos monetarios se transportan como cadenas decimales.
 - Filtros con `django-filter` (`?campo=valor`), búsqueda de texto (`?search=`) y ordenación
   (`?ordering=campo` / `?ordering=-campo`).
-- Permisos (FASE 1, provisional hasta la FASE 2): lectura pública; para crear/editar hace falta
-  una sesión autenticada (admin de Django o API navegable de DRF con un superusuario).
+- Autenticación por **sesión de Django** (cookie `sessionid`, ver ADR 0007). El cliente pide
+  `GET /auth/csrf/` y envía la cabecera `X-CSRFToken` en las peticiones de escritura.
+- Permisos del catálogo: lectura pública. `Source` (configuración del sistema) solo la escribe
+  el personal (`is_staff`); `sellers`/`vehicles`/`listings` los puede crear/editar cualquier
+  usuario autenticado.
 
 ## Endpoints actuales
 
 - `GET /api/v1/health/` — comprobación de vida del servicio y de la conexión a base de datos.
+- **Autenticación** (`apps/accounts`, FASE 2):
+  - `GET /api/v1/auth/csrf/` — fija la cookie `csrftoken`.
+  - `POST /api/v1/auth/register/` — `{email, password}`; crea la cuenta e inicia sesión
+    (`201`). `403` si el registro está deshabilitado (`DJANGO_REGISTRATION_ENABLED`). Límite:
+    `5/hora`.
+  - `POST /api/v1/auth/login/` — `{email, password}`; error genérico (`400`) si fallan. Límite:
+    `10/min`.
+  - `POST /api/v1/auth/logout/` — cierra la sesión (`204`).
+  - `GET /api/v1/auth/me/` — usuario autenticado, o `401`.
+  - `GET·PUT·PATCH /api/v1/preferences/` — preferencias de compra del usuario (singleton, se
+    autocrean): presupuesto objetivo/máximo, año mínimo, kilometraje máximo, `fuel_types`,
+    `body_types` y los pesos `weight_*` (0–100) del Car Score.
 - `GET·POST /api/v1/sources/` · `GET·PUT·PATCH·DELETE /api/v1/sources/{id}/`
   — fuentes de datos. Filtros: `integration_type`, `enabled`. Búsqueda: `name`, `slug`.
 - `GET·POST /api/v1/sellers/` · `.../{id}/` — vendedores. Filtros: `source`, `type`.
@@ -40,5 +55,5 @@ El esquema es la fuente de verdad del contrato; no se mantiene documentación de
   `mileage_max`, `year_min`, `fuel_type`, `status`, `source`, `province`. Búsqueda: `title`,
   `description`. Ordenación: `price_cash`, `mileage_km`, `registration_date`, `created_at`.
 
-> Los endpoints de favoritos, notas, preferencias, score y capturas de anuncio llegan en sus
-> fases (2, 3, 7 y 9); ver `docs/decisions/0006-modelo-de-dominio.md`.
+> Los endpoints de favoritos y notas (FASE 3), score (FASE 7) y capturas de anuncio (FASE 9)
+> llegan en sus fases; ver `docs/decisions/0006-modelo-de-dominio.md`.

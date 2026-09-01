@@ -155,7 +155,9 @@ Puede crearse desde API un vehículo, asociarlo a un anuncio y consultarlo desde
 
 ---
 
-# FASE 2 — Autenticación y perfil
+# FASE 2 — Autenticación y perfil ✅
+
+> **Completada** (2026-09-01). Detalle en `CHANGELOG.md` y ADR `docs/decisions/0007`.
 
 ## Objetivo
 
@@ -163,34 +165,35 @@ Permitir utilizar la plataforma como herramienta personal.
 
 ### Backend
 
-- [ ] Registro.
-- [ ] Login.
-- [ ] Logout.
-- [ ] Usuario autenticado.
-- [ ] Permisos.
-- [ ] UserPreference.
+- [x] Registro. _(`POST /api/v1/auth/register/`, flag `DJANGO_REGISTRATION_ENABLED`)_
+- [x] Login. _(sesión de Django; error genérico; límite `10/min`)_
+- [x] Logout.
+- [x] Usuario autenticado. _(`GET /api/v1/auth/me/`, `GET /auth/csrf/`)_
+- [x] Permisos. _(login por email; `Source` solo staff; revisado ADR 0006 → 0007)_
+- [x] UserPreference. _(`GET·PUT·PATCH /api/v1/preferences/`, singleton autocreado)_
 
 ### Frontend
 
-- [ ] Login.
-- [ ] Registro.
-- [ ] Sesión.
-- [ ] Perfil.
-- [ ] Preferencias de compra.
+- [x] Login. _(`/entrar`)_
+- [x] Registro. _(`/registro`)_
+- [x] Sesión. _(`AuthProvider`, `SiteHeader`, `proxy.ts`, cookies reenviadas en SSR)_
+- [x] Perfil. _(`/perfil`, guard server-side)_
+- [x] Preferencias de compra. _(`PreferencesForm`)_
 
 ### Preferencias iniciales
 
-- [ ] presupuesto objetivo.
-- [ ] presupuesto máximo.
-- [ ] año mínimo.
-- [ ] kilometraje máximo.
-- [ ] combustible.
-- [ ] carrocería.
-- [ ] prioridades.
+- [x] presupuesto objetivo.
+- [x] presupuesto máximo.
+- [x] año mínimo.
+- [x] kilometraje máximo.
+- [x] combustible. _(multiselección sobre `FuelType`)_
+- [x] carrocería. _(texto libre por comas)_
+- [x] prioridades. _(pesos `weight_*` 0–100 del Car Score)_
 
 ### Definición de terminado
 
 Un usuario puede iniciar sesión y guardar sus criterios de búsqueda.
+✅ Flujo completo cubierto por E2E (Playwright): registro → preferencias → cierre de sesión.
 
 ---
 

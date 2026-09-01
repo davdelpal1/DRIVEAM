@@ -108,8 +108,8 @@ Las decisiones de producto se validarán utilizándolo durante un proceso real d
 
 El MVP inicial debe permitir:
 
-- [ ] autenticación;
-- [ ] crear un perfil de preferencias;
+- [x] autenticación;
+- [x] crear un perfil de preferencias;
 - [ ] añadir un coche manualmente;
 - [ ] importar un vehículo mediante URL cuando exista un adaptador compatible;
 - [ ] editar los datos importados;
@@ -149,7 +149,7 @@ No se implementará inicialmente:
 - TypeScript (modo strict)
 - Tailwind CSS v4
 - componentes UI accesibles y reutilizables
-- ESLint · Prettier · Vitest
+- ESLint · Prettier · Vitest · Playwright (E2E)
 
 ### Backend
 
@@ -225,7 +225,10 @@ docker compose up --build
 |---|---|
 | Frontend | http://localhost:3000 |
 | Frontend — catálogo | http://localhost:3000/catalogo |
+| Frontend — registro / login / preferencias | http://localhost:3000/registro · `/entrar` · `/perfil` |
 | API — health | http://localhost:8000/api/v1/health/ |
+| API — autenticación | http://localhost:8000/api/v1/auth/login/ · `/register/` · `/me/` |
+| API — preferencias | http://localhost:8000/api/v1/preferences/ |
 | API — vehículos y anuncios | http://localhost:8000/api/v1/vehicles/ · `/listings/` |
 | API — documentación (Swagger UI) | http://localhost:8000/api/v1/schema/swagger-ui/ |
 | Admin de Django | http://localhost:8000/admin/ |
@@ -235,7 +238,7 @@ La home muestra en verde el estado de los tres servicios cuando todo está conec
 Si el puerto 3000 u 8000 está ocupado, ajusta `FRONTEND_PORT` / `BACKEND_PORT` en `.env`.
 
 ```bash
-docker compose run --rm backend python manage.py createsuperuser   # usuario admin
+docker compose run --rm backend python manage.py createsuperuser   # usuario admin (pide email)
 docker compose run --rm backend python manage.py migrate           # migraciones
 ```
 
@@ -252,9 +255,13 @@ docker compose run --rm backend pytest
 docker compose run --rm frontend npm run lint
 docker compose run --rm frontend npm run typecheck
 docker compose run --rm frontend npm run test
+
+# E2E (Playwright): con el stack levantado y Node en el host
+cd frontend && npm run test:e2e
 ```
 
-Con `make` instalado: `make up`, `make test`, `make lint`, `make check` (ver `make help`).
+Con `make` instalado: `make up`, `make test`, `make test-e2e`, `make lint`, `make check`
+(ver `make help`).
 La CI de GitHub Actions ejecuta estas mismas comprobaciones en cada Pull Request.
 
 ---
@@ -362,11 +369,12 @@ Añadir:
 
 ## 10. Estado
 
-**Estado actual:** FASE 1 completada — modelo de dominio (`Vehicle`, `Listing`, `Source`,
-`Seller`, `FinanceOffer`, `Score`, …), API REST con filtros/paginación/OpenAPI para el catálogo
-y página `/catalogo` en el frontend. Sobre la base de la FASE 0 (monorepo, Docker Compose, CI).
+**Estado actual:** FASE 2 completada — autenticación por sesión (email + contraseña), perfil de
+preferencias de compra (`/api/v1/preferences/`) y páginas `/registro`, `/entrar` y `/perfil` en el
+frontend. Sobre la FASE 1 (modelo de dominio + API del catálogo) y la FASE 0 (monorepo, Docker
+Compose, CI). Ver ADR `docs/decisions/0007`.
 
-**Siguiente:** FASE 2 — autenticación y perfil de preferencias.
+**Siguiente:** FASE 3 — añadir un vehículo manualmente (sustituir la hoja de cálculo).
 
 Siguiente documento: [`PLAN.md`](./PLAN.md)
 

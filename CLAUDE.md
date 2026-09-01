@@ -6,16 +6,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Estado del proyecto
 
-**FASE 1 completada.** Sobre la FASE 0 (monorepo, Docker Compose `db`+`backend`+`frontend`, CI):
-modelo de dominio completo (`Source`, `Seller`, `Vehicle`, `Listing`, `ListingSnapshot`,
-`FinanceOffer`, `Favorite`, `UserVehicleNote`, `UserPreference`, `Score`) con migraciones, API
-REST con CRUD para `sources`/`sellers`/`vehicles`/`listings` (filtros `django-filter`,
-paginación, OpenAPI) y página `/catalogo` en el frontend. Los endpoints de los modelos con dueño
-se difieren a su fase (ver `docs/decisions/0006`). Arranque: `cp .env.example .env` &&
-`docker compose up --build`. Remoto: `github.com/davdelpal1/DRIVEAM`.
+**FASE 2 completada.** Sobre la FASE 1 (modelo de dominio + API del catálogo + `/catalogo`) y la
+FASE 0 (monorepo, Docker Compose `db`+`backend`+`frontend`, CI): autenticación por **sesión de
+Django** (email + contraseña, sin `username`) con endpoints `auth/{csrf,register,login,logout,me}`
+en `apps/accounts`, `GET·PUT·PATCH /api/v1/preferences/` (singleton por usuario), rate limiting en
+login/registro y flag `DJANGO_REGISTRATION_ENABLED`. Frontend: `/registro`, `/entrar`, `/perfil`
+(guard server-side + `src/proxy.ts`), `AuthProvider`, `apiMutate` con `X-CSRFToken`. Permisos del
+catálogo revisados: `Source` solo `is_staff`. E2E con Playwright (job `e2e` en CI). Ver
+`docs/decisions/0007`. Arranque: `cp .env.example .env` && `docker compose up --build`. Remoto:
+`github.com/davdelpal1/DRIVEAM`.
 
-**Siguiente:** FASE 2 de [PLAN.md](PLAN.md) — autenticación (email + contraseña) y perfil de
-preferencias de compra; revisar los permisos provisionales de los viewsets del catálogo.
+**Siguiente:** FASE 3 de [PLAN.md](PLAN.md) — añadir un vehículo manualmente (pantalla "Nuevo
+candidato": crear/editar/eliminar/archivar/favorito) para sustituir la hoja de cálculo.
 
 Los cuatro documentos que son fuente de verdad, en orden de lectura:
 
@@ -73,7 +75,7 @@ incompatible con Django 5.2).
 
 | | Backend | Frontend |
 |---|---|---|
-| Test | `pytest` (pytest-django) | `npm run test` (Vitest + Testing Library; Playwright llegará en FASE 2) |
+| Test | `pytest` (pytest-django) | `npm run test` (Vitest + Testing Library) · `npm run test:e2e` (Playwright, Node en el host + stack levantado) |
 | Lint | `ruff check .` | `npm run lint` (ESLint) |
 | Formato | `ruff format .` (sustituye a Black, ADR 0005) | `npm run format` (Prettier) |
 | Tipos | `mypy .` (progresivo, no 100%) | `npm run typecheck` (TypeScript strict) |

@@ -15,6 +15,10 @@ CORS_ALLOWED_ORIGINS = env.list(
     "DJANGO_CORS_ALLOWED_ORIGINS",
     default=["http://localhost:3000", "http://127.0.0.1:3000"],
 )
+CSRF_TRUSTED_ORIGINS = env.list(
+    "DJANGO_CSRF_TRUSTED_ORIGINS",
+    default=["http://localhost:3000", "http://127.0.0.1:3000"],
+)
 
 # Consola como backend de correo mientras no haya envío real.
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

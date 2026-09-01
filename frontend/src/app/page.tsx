@@ -34,11 +34,17 @@ export default function Home() {
         <h2 className="text-sm font-medium text-zinc-500 uppercase dark:text-zinc-400">
           Dominio · FASE 1
         </h2>
-        <Link
-          className="underline underline-offset-4"
-          href="/catalogo"
-        >
+        <Link className="underline underline-offset-4" href="/catalogo">
           Ver el catálogo de vehículos y anuncios
+        </Link>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-sm font-medium text-zinc-500 uppercase dark:text-zinc-400">
+          Cuenta · FASE 2
+        </h2>
+        <Link className="underline underline-offset-4" href="/registro">
+          Crear una cuenta y guardar tus preferencias de compra
         </Link>
       </section>
 
