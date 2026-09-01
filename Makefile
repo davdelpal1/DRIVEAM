@@ -7,7 +7,7 @@ COMPOSE ?= docker compose
 .DEFAULT_GOAL := help
 .PHONY: help up down build logs ps restart \
         migrate makemigrations superuser backend-shell \
-        test test-backend test-frontend lint format check
+        test test-backend test-frontend test-e2e lint format check
 
 help: ## Muestra esta ayuda
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
@@ -50,6 +50,9 @@ test-backend: ## Tests del backend (pytest)
 
 test-frontend: ## Tests del frontend (vitest)
 	$(COMPOSE) run --rm frontend npm run test
+
+test-e2e: ## Tests E2E (Playwright; requiere Node en el host y `docker compose up` en marcha)
+	cd frontend && npm run test:e2e
 
 lint: ## Lint de backend y frontend
 	$(COMPOSE) run --rm backend ruff check .
