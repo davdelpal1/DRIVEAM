@@ -25,7 +25,10 @@ interface Catalog {
 
 async function loadCatalog(): Promise<Catalog | { error: string }> {
   try {
-    const [vehicles, listings] = await Promise.all([getVehicles(), getListings()]);
+    const [vehicles, listings] = await Promise.all([
+      getVehicles(),
+      getListings(),
+    ]);
     const listingsByVehicle = new Map<number, Listing[]>();
     for (const listing of listings.results) {
       const group = listingsByVehicle.get(listing.vehicle) ?? [];
@@ -34,7 +37,9 @@ async function loadCatalog(): Promise<Catalog | { error: string }> {
     }
     return { vehicles: vehicles.results, listingsByVehicle };
   } catch (error) {
-    return { error: error instanceof Error ? error.message : "error desconocido" };
+    return {
+      error: error instanceof Error ? error.message : "error desconocido",
+    };
   }
 }
 

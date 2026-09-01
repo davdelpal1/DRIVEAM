@@ -39,6 +39,8 @@ en producción). Ya estaba configurado `SessionAuthentication` de DRF y `django-
    autocrea la fila del usuario.
 
 5. **Rate limiting** con `ScopedRateThrottle` de DRF en login (`10/min`) y registro (`5/hour`).
+   El mensaje del `429` se reescribe en español natural con un `EXCEPTION_HANDLER` propio
+   (`apps/core/exceptions.py`), en lugar de la traducción literal de DRF.
 
 6. **Registro abierto** con flag `REGISTRATION_ENABLED` (env, por defecto `True`).
 

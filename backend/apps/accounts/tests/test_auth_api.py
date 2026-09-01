@@ -90,10 +90,12 @@ def test_login_esta_limitado_por_intentos(api_client: APIClient) -> None:
     User.objects.create_user(email="ana@example.test", password=STRONG_PASSWORD)
     payload = {"email": "ana@example.test", "password": "mal"}
 
-    statuses = [api_client.post(LOGIN_URL, payload).status_code for _ in range(11)]
+    responses = [api_client.post(LOGIN_URL, payload) for _ in range(11)]
 
-    assert statuses.count(429) >= 1
-    assert statuses[-1] == 429
+    assert [r.status_code for r in responses].count(429) >= 1
+    assert responses[-1].status_code == 429
+    # Mensaje en español, no la traducción literal de DRF ("Request was throttled…").
+    assert "Demasiados intentos" in responses[-1].json()["detail"]
 
 
 @pytest.mark.django_db

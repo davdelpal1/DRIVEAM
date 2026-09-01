@@ -18,9 +18,7 @@ export default function CatalogoPage() {
       </header>
 
       <Suspense
-        fallback={
-          <p className="text-sm text-zinc-500">Cargando catálogo…</p>
-        }
+        fallback={<p className="text-sm text-zinc-500">Cargando catálogo…</p>}
       >
         <VehicleList />
       </Suspense>
