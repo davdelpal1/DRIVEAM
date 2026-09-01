@@ -96,18 +96,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Preparar .env
-        run: cp .env.example .env
-
-      - name: Levantar el stack
-        run: docker compose up -d --build
-
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
+      # Se instala en el host ANTES de `docker compose up`: así `frontend/node_modules`
+      # lo crea el runner. Si Compose arranca primero, Docker crea ese directorio como
+      # root (punto de montaje del volumen `frontend_node_modules`) y `npm ci` falla
+      # con EACCES.
       - name: Instalar dependencias
         working-directory: frontend
         run: npm ci
@@ -116,9 +114,15 @@ jobs:
         working-directory: frontend
         run: npx playwright install --with-deps chromium
 
+      - name: Preparar .env
+        run: cp .env.example .env
+
+      - name: Levantar el stack
+        run: docker compose up -d --build
+
       - name: Esperar al stack
         run: |
-          for i in $(seq 1 90); do
+          for i in $(seq 1 120); do
             if curl -sf http://localhost:8000/api/v1/health/ >/dev/null \
               && curl -sf http://localhost:3000 >/dev/null; then
               echo "Stack listo"; exit 0
