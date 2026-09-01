@@ -40,6 +40,12 @@ INSTALLED_APPS = [
     # DRIVEAM
     "apps.accounts",
     "apps.core",
+    "apps.sources",
+    "apps.vehicles",
+    "apps.listings",
+    "apps.finance",
+    "apps.favorites",
+    "apps.scoring",
 ]
 
 MIDDLEWARE = [
