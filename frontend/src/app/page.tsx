@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Suspense } from "react";
 
 import { StackStatus } from "@/components/stack-status";
@@ -27,6 +28,18 @@ export default function Home() {
         >
           <StackStatus />
         </Suspense>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-sm font-medium text-zinc-500 uppercase dark:text-zinc-400">
+          Dominio · FASE 1
+        </h2>
+        <Link
+          className="underline underline-offset-4"
+          href="/catalogo"
+        >
+          Ver el catálogo de vehículos y anuncios
+        </Link>
       </section>
 
       <footer className="text-sm text-zinc-500 dark:text-zinc-400">

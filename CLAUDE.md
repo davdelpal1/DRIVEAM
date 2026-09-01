@@ -6,14 +6,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Estado del proyecto
 
-**FASE 0 completada.** El monorepo está montado y funcionando: backend Django + DRF con
-`GET /api/v1/health/` y OpenAPI, frontend Next.js 16 con la home de estado del stack, Docker
-Compose (`db` + `backend` + `frontend`) y CI en GitHub Actions. Arranque: `cp .env.example .env`
-&& `docker compose up --build`. Remoto: `github.com/davdelpal1/DRIVEAM`.
+**FASE 1 completada.** Sobre la FASE 0 (monorepo, Docker Compose `db`+`backend`+`frontend`, CI):
+modelo de dominio completo (`Source`, `Seller`, `Vehicle`, `Listing`, `ListingSnapshot`,
+`FinanceOffer`, `Favorite`, `UserVehicleNote`, `UserPreference`, `Score`) con migraciones, API
+REST con CRUD para `sources`/`sellers`/`vehicles`/`listings` (filtros `django-filter`,
+paginación, OpenAPI) y página `/catalogo` en el frontend. Los endpoints de los modelos con dueño
+se difieren a su fase (ver `docs/decisions/0006`). Arranque: `cp .env.example .env` &&
+`docker compose up --build`. Remoto: `github.com/davdelpal1/DRIVEAM`.
 
-**Siguiente:** FASE 1 de [PLAN.md](PLAN.md) — modelo de dominio (`Source`, `Seller`, `Vehicle`,
-`Listing`, `ListingSnapshot`, `FinanceOffer`, `Favorite`, `UserVehicleNote`, `UserPreference`,
-`Score`) y su API.
+**Siguiente:** FASE 2 de [PLAN.md](PLAN.md) — autenticación (email + contraseña) y perfil de
+preferencias de compra; revisar los permisos provisionales de los viewsets del catálogo.
 
 Los cuatro documentos que son fuente de verdad, en orden de lectura:
 
@@ -31,11 +33,14 @@ Monorepo. Cliente web Next.js (TypeScript strict, Tailwind) → API Django REST 
 ```
 frontend/            Next.js 16 (App Router) — organizar por feature, no un components/ plano
   src/app/           rutas · src/components/ui/ sistema de componentes · src/lib/ (api.ts, cn.ts)
+  src/features/      una carpeta por feature (p. ej. catalog/: types.ts, api.ts, componentes)
 backend/
   config/            proyecto Django: settings/{base,local,test,production}, urls, api_router
-  apps/              una app por dominio: accounts (User), core (health); luego vehicles,
-                     listings, sources, favorites, comparisons, finance, scoring
-docs/decisions/      ADRs 0001-0005 (Contexto / Decisión / Alternativas / Consecuencias)
+  apps/              una app por dominio: accounts (User + UserPreference), core (health +
+                     TimestampedModel), sources, vehicles, listings, finance, favorites,
+                     scoring; comparisons llega en la FASE 5. api.py = serializers + viewsets
+                     + filtersets; enums.py = TextChoices del dominio
+docs/decisions/      ADRs 0001-0006 (Contexto / Decisión / Alternativas / Consecuencias)
 docs/data-sources/   un fichero por fuente externa (plantilla en _template.md)
 ```
 

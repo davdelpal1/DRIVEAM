@@ -12,3 +12,4 @@ Formato: ver [`template.md`](template.md) — Contexto / Decisión / Alternativa
 | [0003](0003-postgresql.md) | PostgreSQL como única base de datos | aceptada |
 | [0004](0004-source-adapter.md) | Patrón Source Adapter para las fuentes | aceptada |
 | [0005](0005-gestion-dependencias-python.md) | Dependencias Python con pyproject.toml + pip | aceptada |
+| [0006](0006-modelo-de-dominio.md) | Forma del modelo de dominio y de su API (FASE 1) | aceptada |

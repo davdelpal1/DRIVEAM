@@ -198,7 +198,7 @@ driveam/
 ├── frontend/            Next.js 16 + Tailwind
 ├── backend/             Django 5.2 + DRF (config/ + apps/)
 ├── docs/
-│   ├── decisions/       ADRs (0001-0005)
+│   ├── decisions/       ADRs (0001-0006)
 │   ├── api/
 │   └── data-sources/
 ├── scripts/
@@ -224,7 +224,9 @@ docker compose up --build
 | Servicio | URL |
 |---|---|
 | Frontend | http://localhost:3000 |
+| Frontend — catálogo | http://localhost:3000/catalogo |
 | API — health | http://localhost:8000/api/v1/health/ |
+| API — vehículos y anuncios | http://localhost:8000/api/v1/vehicles/ · `/listings/` |
 | API — documentación (Swagger UI) | http://localhost:8000/api/v1/schema/swagger-ui/ |
 | Admin de Django | http://localhost:8000/admin/ |
 
@@ -360,10 +362,11 @@ Añadir:
 
 ## 10. Estado
 
-**Estado actual:** FASE 0 completada — monorepo, backend Django + DRF con
-`/api/v1/health/`, frontend Next.js, Docker Compose y CI operativos.
+**Estado actual:** FASE 1 completada — modelo de dominio (`Vehicle`, `Listing`, `Source`,
+`Seller`, `FinanceOffer`, `Score`, …), API REST con filtros/paginación/OpenAPI para el catálogo
+y página `/catalogo` en el frontend. Sobre la base de la FASE 0 (monorepo, Docker Compose, CI).
 
-**Siguiente:** FASE 1 — modelo de dominio (`Vehicle`, `Listing`, `Source`, …).
+**Siguiente:** FASE 2 — autenticación y perfil de preferencias.
 
 Siguiente documento: [`PLAN.md`](./PLAN.md)
 

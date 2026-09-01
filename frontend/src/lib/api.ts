@@ -15,6 +15,14 @@ export function apiBaseUrl(): string {
   return typeof window === "undefined" ? SERVER_BASE_URL : CLIENT_BASE_URL;
 }
 
+/** Respuesta paginada estándar de Django REST Framework (`PageNumberPagination`). */
+export interface Paginated<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
+
 export class ApiError extends Error {
   readonly status: number;
 
