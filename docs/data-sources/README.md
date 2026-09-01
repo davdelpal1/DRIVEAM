@@ -9,4 +9,8 @@ conjuntos de fuentes distintos.
 
 ## Fuentes integradas
 
-_(ninguna todavía — la primera integración llega en la FASE 8)_
+| Fuente | Slug | Tipo | Notas |
+|---|---|---|---|
+| [Entrada manual](manual.md) | `manual` | `MANUAL` | Datos que teclea el usuario (FASE 3); no es una fuente externa |
+
+_(la primera fuente externa llega en la FASE 8)_

@@ -6,18 +6,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Estado del proyecto
 
-**FASE 2 completada.** Sobre la FASE 1 (modelo de dominio + API del catálogo + `/catalogo`) y la
-FASE 0 (monorepo, Docker Compose `db`+`backend`+`frontend`, CI): autenticación por **sesión de
-Django** (email + contraseña, sin `username`) con endpoints `auth/{csrf,register,login,logout,me}`
-en `apps/accounts`, `GET·PUT·PATCH /api/v1/preferences/` (singleton por usuario), rate limiting en
-login/registro y flag `DJANGO_REGISTRATION_ENABLED`. Frontend: `/registro`, `/entrar`, `/perfil`
-(guard server-side + `src/proxy.ts`), `AuthProvider`, `apiMutate` con `X-CSRFToken`. Permisos del
-catálogo revisados: `Source` solo `is_staff`. E2E con Playwright (job `e2e` en CI). Ver
-`docs/decisions/0007`. Arranque: `cp .env.example .env` && `docker compose up --build`. Remoto:
-`github.com/davdelpal1/DRIVEAM`.
+**FASE 3 completada.** Sobre la FASE 2 (autenticación por sesión de Django + `/api/v1/preferences/`),
+la FASE 1 (modelo de dominio + API del catálogo + `/catalogo`) y la FASE 0 (monorepo, Docker
+Compose `db`+`backend`+`frontend`, CI): alta manual de candidatos. Backend: `Listing.owner`
+(nulable) + `Listing.archived_at` + `Listing.url` opcional; endpoint plano
+`GET·POST·PATCH·DELETE /api/v1/candidates/` en `apps/listings` (filtrado por `owner`) con
+acciones `archive`/`unarchive`/`favorite`/`unfavorite` y capa de servicio
+`apps/listings/services.py` (crea `Vehicle`+`Listing`+`Seller`+`UserVehicleNote` en una
+transacción; fuente sintética `manual`). Frontend: `/candidatos` (listado con acciones),
+`/candidatos/nuevo`, `/candidatos/[id]/editar`, feature `src/features/candidates`, enlace en
+la cabecera y guard en `src/proxy.ts`. Ver `docs/decisions/0008` y
+`docs/data-sources/manual.md`. Auth: endpoints `auth/{csrf,register,login,logout,me}` en
+`apps/accounts`, rate limiting y flag `DJANGO_REGISTRATION_ENABLED`; `AuthProvider` + `apiMutate`
+con `X-CSRFToken`. E2E con Playwright (job `e2e` en CI). Arranque: `cp .env.example .env` &&
+`docker compose up --build`. Remoto: `github.com/davdelpal1/DRIVEAM`.
 
-**Siguiente:** FASE 3 de [PLAN.md](PLAN.md) — añadir un vehículo manualmente (pantalla "Nuevo
-candidato": crear/editar/eliminar/archivar/favorito) para sustituir la hoja de cálculo.
+**Siguiente:** FASE 4 de [PLAN.md](PLAN.md) — dashboard "Mis coches": tarjetas/listado con
+filtros, ordenación y estados de seguimiento personal (NEW/INTERESTED/CONTACTED/VISIT/
+DISCARDED/PURCHASED).
 
 Los cuatro documentos que son fuente de verdad, en orden de lectura:
 
