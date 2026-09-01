@@ -19,7 +19,7 @@ def listing(db: None) -> Listing:
 
 @pytest.mark.django_db
 def test_un_usuario_no_puede_marcar_dos_veces_el_mismo_anuncio(listing: Listing) -> None:
-    user = User.objects.create_user("ana", password="secreta-123")
+    user = User.objects.create_user(email="ana@example.test", password="secreta-123")
     Favorite.objects.create(user=user, listing=listing)
     with pytest.raises(IntegrityError), transaction.atomic():
         Favorite.objects.create(user=user, listing=listing)
@@ -27,8 +27,8 @@ def test_un_usuario_no_puede_marcar_dos_veces_el_mismo_anuncio(listing: Listing)
 
 @pytest.mark.django_db
 def test_dos_usuarios_pueden_marcar_el_mismo_anuncio(listing: Listing) -> None:
-    ana = User.objects.create_user("ana", password="secreta-123")
-    luis = User.objects.create_user("luis", password="secreta-123")
+    ana = User.objects.create_user(email="ana@example.test", password="secreta-123")
+    luis = User.objects.create_user(email="luis@example.test", password="secreta-123")
     Favorite.objects.create(user=ana, listing=listing)
     Favorite.objects.create(user=luis, listing=listing)
     assert listing.favorited_by.count() == 2
@@ -36,7 +36,7 @@ def test_dos_usuarios_pueden_marcar_el_mismo_anuncio(listing: Listing) -> None:
 
 @pytest.mark.django_db
 def test_nota_pertenece_al_anuncio(listing: Listing) -> None:
-    user = User.objects.create_user("ana", password="secreta-123")
+    user = User.objects.create_user(email="ana@example.test", password="secreta-123")
     nota = UserVehicleNote.objects.create(
         user=user, listing=listing, text="Preguntar por la distribución"
     )

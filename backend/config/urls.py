@@ -24,6 +24,7 @@ api_v1_patterns: list[URLPattern | URLResolver] = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
+    path("", include("apps.accounts.urls")),
     path("", include("config.api_router")),
 ]
 

@@ -1,13 +1,14 @@
 """API REST de fuentes y vendedores.
 
-Permisos provisionales (`IsAuthenticatedOrReadOnly`): mientras no exista autenticación
-(FASE 2), el catálogo es de lectura pública y la escritura requiere sesión de superusuario
-(admin de Django o API navegable de DRF).
+Permisos (revisados en la FASE 2, ver ADR 0007): lectura pública. `Source` es configuración del
+sistema, no contenido de usuario: solo el personal (`is_staff`) la crea o edita. `Seller` lo puede
+alimentar cualquier usuario autenticado (llega con la ingesta de anuncios).
 """
 
 from rest_framework import serializers, viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
+from apps.core.permissions import IsAdminUserOrReadOnly
 from apps.sources.models import Seller, Source
 
 
@@ -30,7 +31,7 @@ class SellerSerializer(serializers.ModelSerializer):
 class SourceViewSet(viewsets.ModelViewSet):
     queryset = Source.objects.all()
     serializer_class = SourceSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminUserOrReadOnly]
     filterset_fields = ["integration_type", "enabled"]
     search_fields = ["name", "slug"]
     ordering_fields = ["name", "created_at"]
