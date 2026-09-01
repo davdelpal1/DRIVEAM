@@ -88,7 +88,9 @@ git clone
 
 ---
 
-# FASE 1 — Modelo de dominio
+# FASE 1 — Modelo de dominio ✅
+
+> **Completada** (2026-08-28). Detalle en `CHANGELOG.md` y ADR `docs/decisions/0006`.
 
 ## Objetivo
 
@@ -96,54 +98,60 @@ Representar correctamente coches y anuncios antes de construir funcionalidades c
 
 ### Django apps
 
-- [ ] `accounts`
-- [ ] `vehicles`
-- [ ] `listings`
-- [ ] `sources`
-- [ ] `favorites`
-- [ ] `finance`
-- [ ] `scoring`
+- [x] `accounts` _(ya existía; se le añade `UserPreference`)_
+- [x] `vehicles`
+- [x] `listings`
+- [x] `sources`
+- [x] `favorites` _(también `UserVehicleNote`)_
+- [x] `finance`
+- [x] `scoring`
 
 ### Modelos
 
-- [ ] Source.
-- [ ] Seller.
-- [ ] Vehicle.
-- [ ] Listing.
-- [ ] ListingSnapshot.
-- [ ] FinanceOffer.
-- [ ] Favorite.
-- [ ] UserVehicleNote.
-- [ ] UserPreference.
-- [ ] Score.
+- [x] Source.
+- [x] Seller.
+- [x] Vehicle.
+- [x] Listing.
+- [x] ListingSnapshot.
+- [x] FinanceOffer.
+- [x] Favorite.
+- [x] UserVehicleNote.
+- [x] UserPreference.
+- [x] Score.
 
 ### Enums
 
-- [ ] FuelType.
-- [ ] Transmission.
-- [ ] SellerType.
-- [ ] ListingStatus.
-- [ ] IntegrationType.
+- [x] FuelType.
+- [x] Transmission.
+- [x] SellerType.
+- [x] ListingStatus.
+- [x] IntegrationType.
 
 ### API
 
-- [ ] serializers.
-- [ ] viewsets/endpoints.
-- [ ] filtros básicos.
-- [ ] paginación.
-- [ ] OpenAPI.
+- [x] serializers.
+- [x] viewsets/endpoints. _(CRUD de `sources`, `sellers`, `vehicles`, `listings`)_
+- [x] filtros básicos. _(`django-filter` + búsqueda + ordenación; rango de precio/km/año en anuncios)_
+- [x] paginación. _(`PageNumberPagination`, 20/página)_
+- [x] OpenAPI. _(esquema `drf-spectacular` sin avisos)_
+
+> Diferido a su fase por disciplina de hoja de ruta: endpoints de `UserPreference` (FASE 2),
+> `Favorite`/`UserVehicleNote` (FASE 3), escritura de `FinanceOffer` y cálculos (FASE 6),
+> `Score` (FASE 7) y `ListingSnapshot` (FASE 9). Esos modelos existen ya con su admin.
+> Permisos provisionales: lectura pública, escritura autenticada (revisado en FASE 2).
 
 ### Tests
 
-- [ ] creación Vehicle.
-- [ ] creación Listing.
-- [ ] relaciones.
-- [ ] validaciones.
-- [ ] API básica.
+- [x] creación Vehicle.
+- [x] creación Listing.
+- [x] relaciones. _(reverse accessors, `PROTECT`, `CASCADE`)_
+- [x] validaciones. _(rango de año, score 0-100, unicidad `(source, external_id)`, `Decimal` sin redondeo)_
+- [x] API básica. _(paginación, permisos, filtros, ordenación, anidado)_
 
 ### Definición de terminado
 
 Puede crearse desde API un vehículo, asociarlo a un anuncio y consultarlo desde frontend.
+✅ Endpoints `POST /api/v1/vehicles/` + `POST /api/v1/listings/` y página `/catalogo` en el frontend.
 
 ---
 

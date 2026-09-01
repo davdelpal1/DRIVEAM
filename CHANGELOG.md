@@ -9,6 +9,26 @@ y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
 ### Added
 
+- **FASE 1 — Modelo de dominio.**
+  - Apps de dominio: `sources`, `vehicles`, `listings`, `finance`, `favorites`, `scoring`
+    (y `UserPreference` en `accounts`).
+  - Modelos: `Source`, `Seller`, `Vehicle`, `Listing`, `ListingSnapshot`, `FinanceOffer`,
+    `Favorite`, `UserVehicleNote`, `UserPreference`, `Score`, con base común `TimestampedModel`
+    en `apps.core`. `Vehicle` y `Listing` son entidades separadas (1‑N).
+  - Enumeraciones: `FuelType`, `Transmission` (`vehicles`), `IntegrationType`, `SellerType`
+    (`sources`), `ListingStatus` (`listings`), como `TextChoices` con etiquetas en español.
+  - API REST CRUD para `sources`, `sellers`, `vehicles` y `listings`: serializers (con
+    representación anidada de vehículo/fuente/vendedor y ofertas de financiación en el anuncio),
+    filtros con `django-filter` (rango de precio/kilómetros/año, combustible, estado, búsqueda,
+    ordenación), paginación por página y esquema OpenAPI sin avisos. Permisos provisionales
+    `IsAuthenticatedOrReadOnly` hasta la FASE 2.
+  - Django admin para todos los modelos (con inlines de financiación y capturas en el anuncio,
+    y de preferencias en el usuario).
+  - Frontend: página `/catalogo` (Server Component con estados de carga, vacío y error) que
+    lista cada vehículo con sus anuncios; tipos y cliente en `src/features/catalog/`.
+  - 34 tests nuevos de backend (modelos y API) y 3 de frontend.
+  - ADR `docs/decisions/0006-modelo-de-dominio.md`.
+
 - **FASE 0 — Fundación del proyecto.**
   - Estructura de monorepo (`frontend/`, `backend/`, `docs/`, `scripts/`).
   - Backend Django 5.2 + Django REST Framework, con settings divididos por entorno
