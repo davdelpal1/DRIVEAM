@@ -370,32 +370,43 @@ Mostrar el coste real.
 
 ### Datos
 
-- [ ] precio.
-- [ ] entrada.
-- [ ] importe financiado.
-- [ ] cuota.
-- [ ] número de cuotas.
-- [ ] cuota final.
-- [ ] apertura.
-- [ ] TIN.
-- [ ] TAE.
-- [ ] productos adicionales.
+- [x] precio. _(del anuncio; se muestra, no se edita en la calculadora)_
+- [x] entrada.
+- [x] importe financiado. _(o derivado de precio contado − entrada)_
+- [x] cuota.
+- [x] número de cuotas.
+- [x] cuota final.
+- [x] apertura.
+- [x] TIN. _(se guarda; la comprobación cuota-vs-TIN es V2)_
+- [x] TAE. _(íd.)_
+- [x] productos adicionales.
 
 ### Cálculos
 
-- [ ] total cuotas.
-- [ ] coste financiación.
-- [ ] coste total coche.
-- [ ] diferencia frente contado.
-- [ ] coste anual aproximado.
+- [x] total cuotas.
+- [x] coste financiación. _(diferencia del coste total financiado frente al contado)_
+- [x] coste total coche.
+- [x] diferencia frente contado.
+- [x] coste anual aproximado.
 
 ### Tests obligatorios
 
 Casos financieros deben tener tests unitarios deterministas.
 
+- [x] `apps/finance/tests/test_calculator.py` (8 casos con cifras exactas) + `test_api.py`.
+- [x] E2E `frontend/e2e/finance.spec.ts` (calcular → guardar → persistir → comparador).
+
 ### Definición de terminado
 
 El usuario entiende en euros el coste real de cada alternativa.
+
+**FASE 6 completada.** Cálculo determinista en el backend (`apps/finance/calculator.py`,
+`Decimal`, `ROUND_HALF_UP`, ausencia de dato → `None` nunca `0`, método "valores
+anunciados"). `FinanceOffer` escribible; `POST /api/v1/finance/calculate/` (sin estado) y
+`GET·PUT·DELETE /api/v1/candidates/{id}/finance/`. Sin modelo nuevo ni migración. El
+comparador gana la fila "Coste total financiado". Frontend: `src/features/finance` +
+`/candidatos/[id]/financiacion` con previsualización en vivo. Cubierto por
+`frontend/e2e/finance.spec.ts` (job `e2e` de CI). Ver `docs/decisions/0011`.
 
 ---
 

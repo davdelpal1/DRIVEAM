@@ -16,3 +16,5 @@ Formato: ver [`template.md`](template.md) — Contexto / Decisión / Alternativa
 | [0007](0007-autenticacion-y-sesion.md) | Autenticación por sesión y login por email (FASE 2) | aceptada |
 | [0008](0008-candidatos-manuales.md) | Alta manual de candidatos (FASE 3) | aceptada |
 | [0009](0009-dashboard-mis-coches.md) | Dashboard "Mis coches" (FASE 4) | aceptada |
+| [0010](0010-comparador.md) | Comparador de candidatos (FASE 5) | aceptada |
+| [0011](0011-calculadora-financiacion.md) | Calculadora de financiación (FASE 6) | aceptada |

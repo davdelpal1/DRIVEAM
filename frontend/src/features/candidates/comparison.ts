@@ -10,7 +10,11 @@
  * importación por URL de la FASE 8).
  */
 
-import { FUEL_TYPE_OPTIONS, TRACKING_STATUS_LABEL, type Candidate } from "./types";
+import {
+  FUEL_TYPE_OPTIONS,
+  TRACKING_STATUS_LABEL,
+  type Candidate,
+} from "./types";
 
 export const MIN_COMPARE = 2;
 export const MAX_COMPARE = 5;
@@ -59,6 +63,15 @@ export const COMPARISON_ROWS: readonly ComparisonRow[] = [
     badge: "Menor precio financiado",
     value: (c) => (c.price_financed === null ? null : Number(c.price_financed)),
     format: (c) => money(c.price_financed),
+  },
+  {
+    key: "finance_total_cost",
+    label: "Coste total financiado",
+    best: "min",
+    badge: "Menor coste total",
+    value: (c) =>
+      c.finance_total_cost === null ? null : Number(c.finance_total_cost),
+    format: (c) => money(c.finance_total_cost),
   },
   {
     key: "year",
@@ -135,7 +148,8 @@ export const COMPARISON_ROWS: readonly ComparisonRow[] = [
     best: null,
     badge: null,
     value: () => null,
-    format: (c) => TRACKING_STATUS_LABEL[c.tracking_status] ?? c.tracking_status,
+    format: (c) =>
+      TRACKING_STATUS_LABEL[c.tracking_status] ?? c.tracking_status,
   },
 ];
 
@@ -160,8 +174,7 @@ export function bestIds(
   const values = pairs.map((p) => p.v);
   if (new Set(values).size === 1) return new Set();
 
-  const target =
-    row.best === "min" ? Math.min(...values) : Math.max(...values);
+  const target = row.best === "min" ? Math.min(...values) : Math.max(...values);
   return new Set(pairs.filter((p) => p.v === target).map((p) => p.id));
 }
 

@@ -6,6 +6,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Estado del proyecto
 
+**FASE 6 completada.** Calculadora de financiación. Backend: cálculo puro y determinista en
+`backend/apps/finance/calculator.py` (`compute_breakdown` → `FinanceBreakdown`, todo
+`Decimal`, sin redondeo intermedio, `ROUND_HALF_UP` final; la ausencia de un dato deja la
+métrica en `None`, nunca `0`; entrada/apertura/productos ausentes se asumen `0`; método V1
+"valores anunciados": no se recalcula la cuota desde el TIN). `FinanceOfferSerializer` pasa a
+escribible y añade el campo calculado `breakdown`. Endpoints: `POST /api/v1/finance/calculate/`
+(sin estado, previsualización) y acción `GET·PUT·DELETE /api/v1/candidates/{id}/finance/` (una
+oferta por candidato, `update_or_create`). **Sin modelo nuevo ni migración.**
+`CandidateSerializer` expone `finance_total_cost` y `finance_difference_vs_cash`; el comparador
+gana la fila "Coste total financiado". Frontend: feature `src/features/finance` (`format.ts`
+puro y testeado, `finance-breakdown.tsx`, `finance-form.tsx` con debounce) y página
+`/candidatos/[id]/financiacion`; enlaces desde el dashboard, la ficha y el comparador. Tests
+obligatorios en `apps/finance/tests/` + E2E `frontend/e2e/finance.spec.ts`. El límite del
+endpoint de registro es configurable (`DJANGO_THROTTLE_AUTH_REGISTER`, `5/hour` por defecto;
+`.env.example` lo sube para dev/E2E). Ver `docs/decisions/0011`.
+
 **FASE 5 completada.** Comparador (solo frontend, sin backend nuevo): `/candidatos/comparar`
 reutiliza `GET /api/v1/candidates/` y filtra por `?ids=1,2,3` (2–5). Selección desde el
 dashboard con una casilla "Comparar" por tarjeta + barra fija; tabla comparativa con primera
@@ -39,9 +55,10 @@ transacción; fuente sintética `manual`). Frontend: `/candidatos/nuevo`,
 Playwright (job `e2e` en CI). Arranque: `cp .env.example .env` && `docker compose up --build`.
 Remoto: `github.com/davdelpal1/DRIVEAM`.
 
-**Siguiente:** FASE 6 de [PLAN.md](PLAN.md) — calculadora de financiación: entrada, importe
-financiado, cuota, TIN/TAE, coste total y diferencia frente al contado, con tests unitarios
-deterministas obligatorios.
+**Siguiente:** FASE 7 de [PLAN.md](PLAN.md) — Car Score V1: reglas deterministas con pesos
+configurables (precio, km, año, financiación, garantía), score 0–100 y `breakdown` que
+explica el número; versión del algoritmo. Rellena el `score` que hoy es `null` en
+`CandidateSerializer`.
 
 Los cuatro documentos que son fuente de verdad, en orden de lectura:
 

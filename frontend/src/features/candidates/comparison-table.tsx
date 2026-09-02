@@ -3,7 +3,8 @@ import Link from "next/link";
 import { bestIds, COMPARISON_ROWS } from "./comparison";
 import type { Candidate } from "./types";
 
-const cellClass = "min-w-40 border-t border-black/10 p-2 align-top dark:border-white/15";
+const cellClass =
+  "min-w-40 border-t border-black/10 p-2 align-top dark:border-white/15";
 const headColClass =
   "sticky left-0 z-10 bg-background p-2 text-left align-top text-xs font-medium uppercase tracking-wide text-zinc-500";
 const bestClass = "font-semibold text-emerald-700 dark:text-emerald-400";
@@ -36,12 +37,20 @@ export function ComparisonTable({ candidates }: { candidates: Candidate[] }) {
                     {candidate.version}
                   </div>
                 ) : null}
-                <Link
-                  href={`/candidatos/${candidate.id}/editar`}
-                  className="text-xs font-normal text-zinc-500 underline underline-offset-4"
-                >
-                  Ver ficha
-                </Link>
+                <div className="flex flex-col gap-0.5">
+                  <Link
+                    href={`/candidatos/${candidate.id}/editar`}
+                    className="text-xs font-normal text-zinc-500 underline underline-offset-4"
+                  >
+                    Ver ficha
+                  </Link>
+                  <Link
+                    href={`/candidatos/${candidate.id}/financiacion`}
+                    className="text-xs font-normal text-zinc-500 underline underline-offset-4"
+                  >
+                    Financiación
+                  </Link>
+                </div>
               </th>
             ))}
           </tr>
@@ -63,7 +72,7 @@ export function ComparisonTable({ candidates }: { candidates: Candidate[] }) {
                     >
                       {row.format(candidate)}
                       {isBest && row.badge ? (
-                        <span className="ml-1 whitespace-nowrap rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-emerald-700 dark:text-emerald-400">
+                        <span className="ml-1 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-medium tracking-wide whitespace-nowrap text-emerald-700 uppercase dark:text-emerald-400">
                           {row.badge}
                         </span>
                       ) : null}

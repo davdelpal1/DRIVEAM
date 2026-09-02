@@ -11,8 +11,15 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+from apps.finance.api import FinanceCalculateView
+
 api_v1_patterns: list[URLPattern | URLResolver] = [
     path("health/", include("apps.core.urls")),
+    path(
+        "finance/calculate/",
+        FinanceCalculateView.as_view(),
+        name="finance-calculate",
+    ),
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "schema/swagger-ui/",

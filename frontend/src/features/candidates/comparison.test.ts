@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  bestIds,
-  COMPARISON_ROWS,
-  parseCompareIds,
-} from "./comparison";
+import { bestIds, COMPARISON_ROWS, parseCompareIds } from "./comparison";
 import type { Candidate } from "./types";
 
 function candidate(overrides: Partial<Candidate> = {}): Candidate {
@@ -29,6 +25,8 @@ function candidate(overrides: Partial<Candidate> = {}): Candidate {
     source: "manual",
     source_label: "Entrada manual",
     score: null,
+    finance_total_cost: null,
+    finance_difference_vs_cash: null,
     is_favorite: false,
     is_archived: false,
     created_at: "2026-01-01T00:00:00Z",
@@ -75,6 +73,15 @@ describe("bestIds", () => {
       candidate({ id: 2, score: null }),
     ];
     expect(bestIds(cs, row("score")).size).toBe(0);
+  });
+
+  it("marca el menor coste total financiado e ignora candidatos sin oferta", () => {
+    const cs = [
+      candidate({ id: 1, finance_total_cost: "19000.00" }),
+      candidate({ id: 2, finance_total_cost: "17500.00" }),
+      candidate({ id: 3, finance_total_cost: null }),
+    ];
+    expect([...bestIds(cs, row("finance_total_cost"))]).toEqual([2]);
   });
 
   it("no devuelve nada para filas informativas", () => {

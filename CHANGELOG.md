@@ -9,6 +9,31 @@ y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
 ### Added
 
+- **FASE 6 — Calculadora de financiación.**
+  - `apps/finance/calculator.py`: función pura y determinista `compute_breakdown(...)` con
+    `Decimal` (sin redondeo intermedio; cuantización final `ROUND_HALF_UP`). Devuelve
+    importe financiado, total en cuotas, coste total financiado, diferencia frente al
+    contado y coste anual aproximado. La ausencia de un dato deja la métrica en `None`,
+    nunca en `0`. Método V1 = valores anunciados (no se recalcula la cuota desde el TIN).
+  - `FinanceOfferSerializer` pasa a escribible y añade el campo calculado `breakdown`.
+    Nuevo `POST /api/v1/finance/calculate/` (sin estado) y acción
+    `GET·PUT·DELETE /api/v1/candidates/{id}/finance/` (una oferta por candidato). Sin
+    modelo nuevo ni migración.
+  - `CandidateSerializer` expone `finance_total_cost` y `finance_difference_vs_cash`; el
+    comparador (`comparison.ts`) gana la fila "Coste total financiado" (indicador "Menor
+    coste total"), cerrando el punto pendiente del ADR 0010.
+  - Frontend: feature `src/features/finance` (helpers puros `format.ts`, panel de coste,
+    formulario con previsualización en vivo) y página `/candidatos/[id]/financiacion`.
+    Enlaces desde el dashboard, la ficha de edición y el comparador.
+  - Tests: 8 de `calculator` (cifras exactas, datos ausentes, redondeo) + 5 de API
+    (cálculo sin estado, ciclo GET/PUT/DELETE, aislamiento por dueño, coste en el listado)
+    + 6 de frontend (`format`) + 1 de `comparison` + E2E `frontend/e2e/finance.spec.ts`
+    (previsualización en vivo → guardar → persistencia → fila del comparador).
+  - `DEFAULT_THROTTLE_RATES` del registro pasa a ser configurable
+    (`DJANGO_THROTTLE_AUTH_REGISTER`, por defecto `5/hour`); `.env.example` lo sube a
+    `1000/hour` para desarrollo y para la suite E2E (una cuenta nueva por spec).
+  - ADR `docs/decisions/0011-calculadora-financiacion.md`.
+
 - **FASE 5 — Comparador.**
   - Frontend puro: en "Mis coches" cada tarjeta tiene una casilla "Comparar"; al marcar
     entre 2 y 5 candidatos, una barra fija enlaza a `/candidatos/comparar?ids=…`.
