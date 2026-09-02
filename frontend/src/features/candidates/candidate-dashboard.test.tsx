@@ -75,6 +75,25 @@ describe("CandidateDashboard", () => {
     expect(screen.getByText(/Kia León/)).toBeInTheDocument();
   });
 
+  it("habilita el enlace de comparar al marcar dos candidatos", () => {
+    render(
+      <CandidateDashboard
+        candidates={[
+          candidate({ id: 1, make: "Seat" }),
+          candidate({ id: 2, make: "Kia" }),
+        ]}
+      />,
+    );
+
+    const [first, second] = screen.getAllByLabelText("Comparar");
+    fireEvent.click(first!);
+    expect(screen.getByText(/Elige 2\+ para comparar/)).toBeInTheDocument();
+
+    fireEvent.click(second!);
+    const link = screen.getByRole("link", { name: /Comparar \(2\)/ });
+    expect(link).toHaveAttribute("href", "/candidatos/comparar?ids=1,2");
+  });
+
   it("cambia el estado de seguimiento de una tarjeta", async () => {
     render(<CandidateDashboard candidates={[candidate({ id: 7 })]} />);
 

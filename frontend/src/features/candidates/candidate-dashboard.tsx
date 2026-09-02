@@ -12,6 +12,7 @@ import {
   unarchiveCandidate,
   unfavoriteCandidate,
 } from "./api";
+import { MAX_COMPARE, MIN_COMPARE } from "./comparison";
 import {
   applyFilters,
   EMPTY_FILTERS,
@@ -42,7 +43,17 @@ const selectClass =
 const inputClass =
   "h-9 w-full rounded-lg border border-black/15 bg-transparent px-2 text-sm dark:border-white/20";
 
-function CandidateCard({ candidate }: { candidate: Candidate }) {
+function CandidateCard({
+  candidate,
+  selected,
+  selectionFull,
+  onToggleSelect,
+}: {
+  candidate: Candidate;
+  selected: boolean;
+  selectionFull: boolean;
+  onToggleSelect: () => void;
+}) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
 
@@ -107,6 +118,17 @@ function CandidateCard({ candidate }: { candidate: Candidate }) {
         {candidate.notes ? (
           <p className="whitespace-pre-line text-zinc-500">{candidate.notes}</p>
         ) : null}
+
+        <label className="flex items-center gap-2 text-xs font-medium text-zinc-600 dark:text-zinc-400">
+          <input
+            type="checkbox"
+            className="size-4"
+            checked={selected}
+            disabled={!selected && selectionFull}
+            onChange={onToggleSelect}
+          />
+          Comparar
+        </label>
 
         <label className="flex items-center gap-2 text-xs font-medium text-zinc-600 dark:text-zinc-400">
           Estado
@@ -200,9 +222,18 @@ export function CandidateDashboard({
 }) {
   const [filters, setFilters] = useState<DashboardFilters>(EMPTY_FILTERS);
   const [sort, setSort] = useState<SortKey>("created_desc");
+  const [selected, setSelected] = useState<number[]>([]);
 
   function patch(part: Partial<DashboardFilters>) {
     setFilters((prev) => ({ ...prev, ...part }));
+  }
+
+  function toggleSelect(id: number) {
+    setSelected((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      if (prev.length >= MAX_COMPARE) return prev;
+      return [...prev, id];
+    });
   }
 
   const visible = useMemo(
@@ -348,8 +379,45 @@ export function CandidateDashboard({
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {visible.map((candidate) => (
-            <CandidateCard key={candidate.id} candidate={candidate} />
+            <CandidateCard
+              key={candidate.id}
+              candidate={candidate}
+              selected={selected.includes(candidate.id)}
+              selectionFull={selected.length >= MAX_COMPARE}
+              onToggleSelect={() => toggleSelect(candidate.id)}
+            />
           ))}
+        </div>
+      )}
+
+      {selected.length > 0 && (
+        <div className="sticky bottom-4 z-20 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-black/10 bg-background/95 p-3 text-sm shadow-lg backdrop-blur dark:border-white/15">
+          <span className="text-zinc-600 dark:text-zinc-400">
+            {selected.length}{" "}
+            {selected.length === 1 ? "seleccionado" : "seleccionados"} para
+            comparar (máx. {MAX_COMPARE})
+          </span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setSelected([])}
+              className="rounded-full border border-black/15 px-3 py-1 font-medium hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+            >
+              Limpiar
+            </button>
+            {selected.length >= MIN_COMPARE ? (
+              <Link
+                href={`/candidatos/comparar?ids=${selected.join(",")}`}
+                className="rounded-full bg-foreground px-3 py-1 font-medium text-background hover:opacity-90"
+              >
+                Comparar ({selected.length})
+              </Link>
+            ) : (
+              <span className="rounded-full border border-black/15 px-3 py-1 text-zinc-400 dark:border-white/20">
+                Elige {MIN_COMPARE}+ para comparar
+              </span>
+            )}
+          </div>
         </div>
       )}
     </div>

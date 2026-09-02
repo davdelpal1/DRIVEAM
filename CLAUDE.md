@@ -6,6 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Estado del proyecto
 
+**FASE 5 completada.** Comparador (solo frontend, sin backend nuevo): `/candidatos/comparar`
+reutiliza `GET /api/v1/candidates/` y filtra por `?ids=1,2,3` (2–5). Selección desde el
+dashboard con una casilla "Comparar" por tarjeta + barra fija; tabla comparativa con primera
+columna `sticky` y scroll horizontal en móvil, resaltando el mejor valor de cada criterio
+(precio contado/financiado, año, km, potencia, garantía, score). Helpers puros y testeados en
+`src/features/candidates/comparison.ts` (`COMPARISON_ROWS`, `bestIds`, `parseCompareIds`),
+tabla en `comparison-table.tsx`. `consumo` aplazado (no hay dato hasta FASE 8). Ver
+`docs/decisions/0010`.
+
 **FASE 4 completada.** Sobre la FASE 3 (alta manual de candidatos), la FASE 2 (autenticación
 por sesión de Django + `/api/v1/preferences/`), la FASE 1 (modelo de dominio + API del catálogo
 + `/catalogo`) y la FASE 0 (monorepo, Docker Compose `db`+`backend`+`frontend`, CI):
@@ -30,9 +39,9 @@ transacción; fuente sintética `manual`). Frontend: `/candidatos/nuevo`,
 Playwright (job `e2e` en CI). Arranque: `cp .env.example .env` && `docker compose up --build`.
 Remoto: `github.com/davdelpal1/DRIVEAM`.
 
-**Siguiente:** FASE 5 de [PLAN.md](PLAN.md) — comparador: seleccionar entre 2 y 5 candidatos y
-verlos en una tabla comparativa con indicadores (menor precio, menos km, más nuevo, mejor
-score).
+**Siguiente:** FASE 6 de [PLAN.md](PLAN.md) — calculadora de financiación: entrada, importe
+financiado, cuota, TIN/TAE, coste total y diferencia frente al contado, con tests unitarios
+deterministas obligatorios.
 
 Los cuatro documentos que son fuente de verdad, en orden de lectura:
 
@@ -55,7 +64,9 @@ backend/
   config/            proyecto Django: settings/{base,local,test,production}, urls, api_router
   apps/              una app por dominio: accounts (User + UserPreference), core (health +
                      TimestampedModel), sources, vehicles, listings, finance, favorites,
-                     scoring; comparisons llega en la FASE 5. api.py = serializers + viewsets
+                     scoring. El comparador (FASE 5) es solo frontend: no hay app
+                     `comparisons` porque todavía no se persiste ninguna comparación.
+                     api.py = serializers + viewsets
                      + filtersets; enums.py = TextChoices del dominio
 docs/decisions/      ADRs 0001-0006 (Contexto / Decisión / Alternativas / Consecuencias)
 docs/data-sources/   un fichero por fuente externa (plantilla en _template.md)

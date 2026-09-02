@@ -321,22 +321,22 @@ Comparar entre 2 y 5 coches.
 
 ### UI
 
-- [ ] selector de candidatos.
-- [ ] tabla comparativa.
-- [ ] sticky columns en desktop.
-- [ ] diseño usable en móvil.
+- [x] selector de candidatos. _(casilla "Comparar" por tarjeta en "Mis coches" + barra fija)_
+- [x] tabla comparativa. _(`/candidatos/comparar?ids=…`)_
+- [x] sticky columns en desktop. _(primera columna `sticky`; scroll horizontal en el contenedor)_
+- [x] diseño usable en móvil.
 
 ### Comparar
 
-- [ ] precio.
-- [ ] año.
-- [ ] kilómetros.
-- [ ] potencia.
-- [ ] consumo.
-- [ ] financiación.
-- [ ] garantía.
-- [ ] vendedor.
-- [ ] score.
+- [x] precio. _(contado y financiado)_
+- [x] año.
+- [x] kilómetros.
+- [x] potencia.
+- [ ] consumo. _(aplazado: `Vehicle` no tiene el dato; llega con la FASE 8)_
+- [x] financiación. _(fila "Precio financiado"; cálculos completos en la FASE 6)_
+- [x] garantía.
+- [x] vendedor.
+- [x] score. _(placeholder "—" hasta la FASE 7)_
 
 ### Indicadores
 
@@ -349,9 +349,16 @@ MÁS NUEVO          ✓
 MEJOR SCORE        ✓
 ```
 
+- [x] implementados. _(`bestIds` en `comparison.ts`: ignora ausentes, no destaca si hay empate total)_
+
 ### Definición de terminado
 
 El usuario puede decidir visualmente qué vehículo destaca en cada criterio.
+
+**FASE 5 completada.** Feature solo de frontend (sin backend nuevo): `/candidatos/comparar`
+reutiliza `GET /api/v1/candidates/` y filtra por `?ids=`. Selección desde el dashboard,
+helpers puros `src/features/candidates/comparison.ts` (`COMPARISON_ROWS`, `bestIds`,
+`parseCompareIds`) + tabla `comparison-table.tsx`. Ver `docs/decisions/0010`.
 
 ---
 
