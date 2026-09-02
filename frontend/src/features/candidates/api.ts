@@ -26,6 +26,15 @@ export function deleteCandidate(id: number): Promise<void> {
   return apiMutate<void>(`/candidates/${id}/`, "DELETE");
 }
 
+export function setCandidateStatus(
+  id: number,
+  status: string,
+): Promise<Candidate> {
+  return apiMutate<Candidate>(`/candidates/${id}/`, "PATCH", {
+    tracking_status: status,
+  });
+}
+
 export function archiveCandidate(id: number): Promise<Candidate> {
   return apiMutate<Candidate>(`/candidates/${id}/archive/`, "POST");
 }

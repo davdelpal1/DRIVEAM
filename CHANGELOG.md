@@ -9,6 +9,34 @@ y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
 ### Added
 
+- **FASE 4 — Dashboard "Mis coches".**
+  - `Listing.tracking_status` + enum `TrackingStatus` (`nuevo` / `interesado` / `contactado` /
+    `visita` / `descartado` / `comprado`): estado de seguimiento personal del candidato,
+    distinto de `ListingStatus` y de `archived_at`. Migración `listings/0003`.
+  - `CandidateSerializer` gana `tracking_status` (escribible; se cambia por el `PATCH
+    /api/v1/candidates/{id}/` existente), `source` / `source_label` y `score` (placeholder
+    `null` hasta la FASE 7). `CandidateFilter` ampliado: `price_min/max`, `year_min/max`,
+    `mileage_max`, `fuel_type`, `tracking_status`, `is_favorite`.
+  - Frontend: `/candidatos` pasa a ser el dashboard "Mis coches" — barra de filtros (precio,
+    año, km, combustible, estado, solo favoritos, archivados), ordenación (precio, score, km,
+    año, fecha de alta) y tarjetas con placeholder de imagen, fuente, score y `<select>` de
+    estado por tarjeta. Filtrado y orden en cliente (`dashboard-filters.ts`, puro y testeado).
+    Enlace de cabecera "Candidatos" → "Mis coches".
+  - Tests: 5 de backend (estado por defecto, cambio de estado, filtros por estado/precio/año/
+    favorito) y 7 de frontend (helpers + dashboard); E2E ampliado con cambio de estado y filtro.
+  - ADR `docs/decisions/0009-dashboard-mis-coches.md`.
+
+- **FASE 3 — Alta manual de candidatos.**
+  - `Listing.owner` (nulable), `Listing.archived_at`, `Listing.url` opcional; migración
+    `listings/0002`. Endpoint plano `GET·POST·PATCH·DELETE /api/v1/candidates/`
+    (`CandidateViewSet`) filtrado por `owner`, con acciones `archive` / `unarchive` /
+    `favorite` / `unfavorite` y capa de servicio `apps/listings/services.py` (crea
+    `Vehicle` + `Listing` + `Seller` + `UserVehicleNote` en una transacción; fuente sintética
+    `manual`).
+  - Frontend: `/candidatos`, `/candidatos/nuevo`, `/candidatos/[id]/editar`; feature
+    `src/features/candidates`; guard en `src/proxy.ts`.
+  - ADR `docs/decisions/0008-candidatos-manuales.md`, `docs/data-sources/manual.md`.
+
 - **FASE 2 — Autenticación y perfil.**
   - Autenticación por sesión de Django (email + contraseña, sin `username`): endpoints
     `auth/csrf/`, `auth/register/`, `auth/login/`, `auth/logout/`, `auth/me/` en `apps/accounts`,

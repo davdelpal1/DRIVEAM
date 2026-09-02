@@ -258,32 +258,32 @@ Gestionar rápidamente todos los candidatos.
 
 ### Pantalla principal
 
-- [ ] tarjetas/listado.
-- [ ] fotografía o placeholder.
-- [ ] marca/modelo.
-- [ ] precio.
-- [ ] año.
-- [ ] kilómetros.
-- [ ] score.
-- [ ] fuente.
-- [ ] favorito.
+- [x] tarjetas/listado.
+- [x] fotografía o placeholder. _(placeholder: inicial de la marca; las imágenes llegan en la FASE 8)_
+- [x] marca/modelo.
+- [x] precio.
+- [x] año.
+- [x] kilómetros.
+- [x] score. _(placeholder "—" hasta la FASE 7)_
+- [x] fuente.
+- [x] favorito.
 
 ### Filtros
 
-- [ ] precio.
-- [ ] año.
-- [ ] km.
-- [ ] combustible.
-- [ ] estado.
-- [ ] favorito.
+- [x] precio.
+- [x] año.
+- [x] km.
+- [x] combustible.
+- [x] estado.
+- [x] favorito.
 
 ### Ordenación
 
-- [ ] precio.
-- [ ] score.
-- [ ] km.
-- [ ] año.
-- [ ] fecha añadido.
+- [x] precio.
+- [x] score.
+- [x] km.
+- [x] año.
+- [x] fecha añadido.
 
 ### Estados personalizados
 
@@ -296,12 +296,20 @@ DISCARDED
 PURCHASED
 ```
 
-- [ ] implementar estados.
-- [ ] permitir cambiar estado rápidamente.
+- [x] implementar estados. _(`TrackingStatus` + `Listing.tracking_status`)_
+- [x] permitir cambiar estado rápidamente. _(`<select>` por tarjeta → `PATCH /api/v1/candidates/{id}/`)_
 
 ### Definición de terminado
 
 El usuario puede gestionar toda su búsqueda desde una sola pantalla.
+
+**FASE 4 completada.** `Listing.tracking_status` + enum `TrackingStatus` (migración
+`listings/0003`); `CandidateSerializer` expone `tracking_status` (escribible), `source` /
+`source_label` y `score` (`null` hasta FASE 7); `CandidateFilter` con filtros de
+precio/año/km/combustible/estado/favorito. Frontend: `/candidatos` es el dashboard "Mis
+coches" (`candidate-dashboard.tsx` + helpers puros `dashboard-filters.ts`), filtrado y orden
+en cliente, tarjetas con placeholder + estado por tarjeta; enlace de cabecera "Mis coches".
+Ver `docs/decisions/0009`.
 
 ---
 

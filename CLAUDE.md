@@ -6,24 +6,33 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Estado del proyecto
 
-**FASE 3 completada.** Sobre la FASE 2 (autenticación por sesión de Django + `/api/v1/preferences/`),
-la FASE 1 (modelo de dominio + API del catálogo + `/catalogo`) y la FASE 0 (monorepo, Docker
-Compose `db`+`backend`+`frontend`, CI): alta manual de candidatos. Backend: `Listing.owner`
-(nulable) + `Listing.archived_at` + `Listing.url` opcional; endpoint plano
-`GET·POST·PATCH·DELETE /api/v1/candidates/` en `apps/listings` (filtrado por `owner`) con
+**FASE 4 completada.** Sobre la FASE 3 (alta manual de candidatos), la FASE 2 (autenticación
+por sesión de Django + `/api/v1/preferences/`), la FASE 1 (modelo de dominio + API del catálogo
++ `/catalogo`) y la FASE 0 (monorepo, Docker Compose `db`+`backend`+`frontend`, CI):
+dashboard "Mis coches". Backend: `Listing.tracking_status` + enum `TrackingStatus`
+(`nuevo`/`interesado`/`contactado`/`visita`/`descartado`/`comprado`; migración `listings/0003`),
+`CandidateSerializer` expone `tracking_status` (escribible vía `PATCH /api/v1/candidates/{id}/`),
+`source`/`source_label` y `score` (`null` hasta FASE 7); `CandidateFilter` con
+precio/año/km/combustible/estado/favorito. Frontend: `/candidatos` es el dashboard
+(`src/features/candidates/candidate-dashboard.tsx` + helpers puros `dashboard-filters.ts`),
+filtrado y orden en **cliente**, tarjetas con placeholder de imagen + `<select>` de estado por
+tarjeta; enlace de cabecera "Mis coches". Ver `docs/decisions/0009`.
+
+FASE 3: `Listing.owner` (nulable) + `Listing.archived_at` + `Listing.url` opcional; endpoint
+plano `GET·POST·PATCH·DELETE /api/v1/candidates/` en `apps/listings` (filtrado por `owner`) con
 acciones `archive`/`unarchive`/`favorite`/`unfavorite` y capa de servicio
 `apps/listings/services.py` (crea `Vehicle`+`Listing`+`Seller`+`UserVehicleNote` en una
-transacción; fuente sintética `manual`). Frontend: `/candidatos` (listado con acciones),
-`/candidatos/nuevo`, `/candidatos/[id]/editar`, feature `src/features/candidates`, enlace en
-la cabecera y guard en `src/proxy.ts`. Ver `docs/decisions/0008` y
-`docs/data-sources/manual.md`. Auth: endpoints `auth/{csrf,register,login,logout,me}` en
-`apps/accounts`, rate limiting y flag `DJANGO_REGISTRATION_ENABLED`; `AuthProvider` + `apiMutate`
-con `X-CSRFToken`. E2E con Playwright (job `e2e` en CI). Arranque: `cp .env.example .env` &&
-`docker compose up --build`. Remoto: `github.com/davdelpal1/DRIVEAM`.
+transacción; fuente sintética `manual`). Frontend: `/candidatos/nuevo`,
+`/candidatos/[id]/editar`, feature `src/features/candidates`, guard en `src/proxy.ts`. Ver
+`docs/decisions/0008` y `docs/data-sources/manual.md`. Auth: endpoints
+`auth/{csrf,register,login,logout,me}` en `apps/accounts`, rate limiting y flag
+`DJANGO_REGISTRATION_ENABLED`; `AuthProvider` + `apiMutate` con `X-CSRFToken`. E2E con
+Playwright (job `e2e` en CI). Arranque: `cp .env.example .env` && `docker compose up --build`.
+Remoto: `github.com/davdelpal1/DRIVEAM`.
 
-**Siguiente:** FASE 4 de [PLAN.md](PLAN.md) — dashboard "Mis coches": tarjetas/listado con
-filtros, ordenación y estados de seguimiento personal (NEW/INTERESTED/CONTACTED/VISIT/
-DISCARDED/PURCHASED).
+**Siguiente:** FASE 5 de [PLAN.md](PLAN.md) — comparador: seleccionar entre 2 y 5 candidatos y
+verlos en una tabla comparativa con indicadores (menor precio, menos km, más nuevo, mejor
+score).
 
 Los cuatro documentos que son fuente de verdad, en orden de lectura:
 

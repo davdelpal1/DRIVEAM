@@ -9,6 +9,23 @@
 
 export { FUEL_TYPE_OPTIONS } from "@/features/preferences/types";
 
+/** Estados de seguimiento personal del candidato (`backend/apps/listings/enums.py::TrackingStatus`). */
+export const TRACKING_STATUS_OPTIONS: ReadonlyArray<{
+  value: string;
+  label: string;
+}> = [
+  { value: "nuevo", label: "Nuevo" },
+  { value: "interesado", label: "Interesado" },
+  { value: "contactado", label: "Contactado" },
+  { value: "visita", label: "Visita" },
+  { value: "descartado", label: "Descartado" },
+  { value: "comprado", label: "Comprado" },
+];
+
+export const TRACKING_STATUS_LABEL: Record<string, string> = Object.fromEntries(
+  TRACKING_STATUS_OPTIONS.map((o) => [o.value, o.label]),
+);
+
 export interface Candidate {
   id: number;
   vehicle_id: number;
@@ -26,6 +43,10 @@ export interface Candidate {
   location: string;
   url: string;
   notes: string;
+  tracking_status: string;
+  source: string;
+  source_label: string;
+  score: number | null;
   is_favorite: boolean;
   is_archived: boolean;
   created_at: string;

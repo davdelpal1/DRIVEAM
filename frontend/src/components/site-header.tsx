@@ -41,7 +41,7 @@ export function SiteHeader() {
                 href="/candidatos"
                 className="text-zinc-600 hover:underline dark:text-zinc-300"
               >
-                Candidatos
+                Mis coches
               </Link>
               <Link
                 href="/perfil"

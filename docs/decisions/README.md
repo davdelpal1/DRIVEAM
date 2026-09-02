@@ -15,3 +15,4 @@ Formato: ver [`template.md`](template.md) — Contexto / Decisión / Alternativa
 | [0006](0006-modelo-de-dominio.md) | Forma del modelo de dominio y de su API (FASE 1) | aceptada |
 | [0007](0007-autenticacion-y-sesion.md) | Autenticación por sesión y login por email (FASE 2) | aceptada |
 | [0008](0008-candidatos-manuales.md) | Alta manual de candidatos (FASE 3) | aceptada |
+| [0009](0009-dashboard-mis-coches.md) | Dashboard "Mis coches" (FASE 4) | aceptada |

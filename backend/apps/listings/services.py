@@ -23,7 +23,15 @@ _MANUAL_SOURCE_SLUG = "manual"
 
 # Campos que viajan planos en el payload del candidato y a qué modelo pertenecen.
 _VEHICLE_FIELDS = ("make", "model", "version", "fuel_type", "power_cv", "first_registration_year")
-_LISTING_FIELDS = ("mileage_km", "price_cash", "price_financed", "warranty_months", "city", "url")
+_LISTING_FIELDS = (
+    "mileage_km",
+    "price_cash",
+    "price_financed",
+    "warranty_months",
+    "city",
+    "url",
+    "tracking_status",
+)
 
 
 def get_manual_source() -> Source:

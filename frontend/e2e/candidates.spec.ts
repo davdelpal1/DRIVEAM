@@ -29,6 +29,19 @@ test("alta, favorito, edición, archivado y borrado de un candidato", async ({
   await card.getByRole("button", { name: "Favorito" }).click();
   await expect(card).toContainText("favorito");
 
+  // --- Estado de seguimiento: cambio rápido desde la tarjeta y persistencia ---
+  await card.getByLabel("Estado").selectOption("visita");
+  await page.reload();
+  card = page.locator("article", { hasText: "Seat León" });
+  await expect(card.getByLabel("Estado")).toHaveValue("visita");
+
+  // --- Filtro por estado ---
+  await page.getByLabel("Filtrar por estado").selectOption("descartado");
+  await expect(card).toBeHidden();
+  await page.getByLabel("Filtrar por estado").selectOption("visita");
+  await expect(card).toBeVisible();
+  await page.getByLabel("Filtrar por estado").selectOption("");
+
   // --- Edición ---
   await card.getByRole("link", { name: "Editar" }).click();
   await expect(page).toHaveURL(/\/candidatos\/\d+\/editar$/);
