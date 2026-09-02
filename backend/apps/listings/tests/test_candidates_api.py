@@ -113,3 +113,57 @@ def test_eliminar_borra_el_vehiculo_huerfano(user_client: APIClient) -> None:
 @pytest.mark.django_db
 def test_anonimo_no_puede_listar(api_client: APIClient) -> None:
     assert api_client.get(BASE).status_code in (401, 403)
+
+
+# --- FASE 4: estados de seguimiento y filtros del dashboard --------------------------
+
+
+@pytest.mark.django_db
+def test_estado_seguimiento_por_defecto_es_nuevo(user_client: APIClient) -> None:
+    body = user_client.post(BASE, _payload(), format="json").json()
+    assert body["tracking_status"] == "nuevo"
+    assert body["source"] == "manual"
+    assert body["score"] is None
+
+
+@pytest.mark.django_db
+def test_cambiar_estado_seguimiento(user_client: APIClient) -> None:
+    cid = user_client.post(BASE, _payload(), format="json").json()["id"]
+
+    response = user_client.patch(f"{BASE}{cid}/", {"tracking_status": "visita"}, format="json")
+
+    assert response.status_code == 200, response.content
+    assert response.json()["tracking_status"] == "visita"
+    assert Listing.objects.get(pk=cid).tracking_status == "visita"
+
+
+@pytest.mark.django_db
+def test_filtrar_por_estado_de_seguimiento(user_client: APIClient) -> None:
+    user_client.post(BASE, _payload(), format="json")
+    cid = user_client.post(BASE, _payload(make="Kia"), format="json").json()["id"]
+    user_client.patch(f"{BASE}{cid}/", {"tracking_status": "visita"}, format="json")
+
+    data = user_client.get(BASE, {"tracking_status": "visita"}).json()
+    assert data["count"] == 1
+    assert data["results"][0]["id"] == cid
+
+
+@pytest.mark.django_db
+def test_filtrar_por_precio_y_anio(user_client: APIClient) -> None:
+    user_client.post(BASE, _payload(price_cash="12000.00", year=2018), format="json")
+    user_client.post(BASE, _payload(price_cash="25000.00", year=2023), format="json")
+
+    data = user_client.get(BASE, {"price_max": "20000", "year_min": "2015"}).json()
+    assert data["count"] == 1
+    assert data["results"][0]["price_cash"] == "12000.00"
+
+
+@pytest.mark.django_db
+def test_filtrar_por_favorito(user_client: APIClient) -> None:
+    fav_id = user_client.post(BASE, _payload(), format="json").json()["id"]
+    user_client.post(BASE, _payload(make="Kia"), format="json")
+    user_client.post(f"{BASE}{fav_id}/favorite/")
+
+    data = user_client.get(BASE, {"is_favorite": "true"}).json()
+    assert data["count"] == 1
+    assert data["results"][0]["id"] == fav_id

@@ -16,7 +16,7 @@ from django.db import models
 from django.utils import timezone
 
 from apps.core.models import TimestampedModel
-from apps.listings.enums import ListingStatus
+from apps.listings.enums import ListingStatus, TrackingStatus
 from apps.sources.models import Seller, Source
 from apps.vehicles.models import Vehicle
 
@@ -91,6 +91,12 @@ class Listing(TimestampedModel):
         default=ListingStatus.ACTIVE,
     )
     archived_at = models.DateTimeField("archivado el", null=True, blank=True)
+    tracking_status = models.CharField(
+        "estado de seguimiento",
+        max_length=20,
+        choices=TrackingStatus.choices,
+        default=TrackingStatus.NEW,
+    )
     first_seen_at = models.DateTimeField("primera vez visto", default=timezone.now)
     last_seen_at = models.DateTimeField("última vez visto", default=timezone.now)
     published_at = models.DateTimeField("publicado el", null=True, blank=True)

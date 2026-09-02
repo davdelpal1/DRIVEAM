@@ -23,6 +23,7 @@ from apps.accounts.models import User
 from apps.favorites.models import Favorite
 from apps.finance.api import FinanceOfferSerializer
 from apps.listings import services
+from apps.listings.enums import TrackingStatus
 from apps.listings.models import Listing
 from apps.sources.api import SellerSerializer, SourceSerializer
 from apps.vehicles.api import VehicleSerializer
@@ -99,6 +100,9 @@ class CandidateSerializer(serializers.Serializer):
     location = serializers.CharField(max_length=120, required=False, allow_blank=True, default="")
     url = serializers.URLField(max_length=500, required=False, allow_blank=True, default="")
     notes = serializers.CharField(required=False, allow_blank=True, default="")
+    tracking_status = serializers.ChoiceField(
+        choices=TrackingStatus.choices, required=False, default=TrackingStatus.NEW
+    )
 
     is_favorite = serializers.SerializerMethodField()
     is_archived = serializers.SerializerMethodField()
@@ -136,6 +140,10 @@ class CandidateSerializer(serializers.Serializer):
             "location": instance.city,
             "url": instance.url,
             "notes": note.text if note else "",
+            "tracking_status": instance.tracking_status,
+            "source": instance.source.slug,
+            "source_label": instance.source.name,
+            "score": None,
             "is_favorite": self.get_is_favorite(instance),
             "is_archived": self.get_is_archived(instance),
             "created_at": instance.created_at,
@@ -162,23 +170,46 @@ class CandidateFilter(filters.FilterSet):
     is_archived = filters.BooleanFilter(
         field_name="archived_at", lookup_expr="isnull", exclude=True
     )
+    price_min = filters.NumberFilter(field_name="price_cash", lookup_expr="gte")
+    price_max = filters.NumberFilter(field_name="price_cash", lookup_expr="lte")
+    year_min = filters.NumberFilter(
+        field_name="vehicle__first_registration_year", lookup_expr="gte"
+    )
+    year_max = filters.NumberFilter(
+        field_name="vehicle__first_registration_year", lookup_expr="lte"
+    )
+    mileage_max = filters.NumberFilter(field_name="mileage_km", lookup_expr="lte")
+    fuel_type = filters.CharFilter(field_name="vehicle__fuel_type", lookup_expr="exact")
+    tracking_status = filters.CharFilter(lookup_expr="exact")
+    is_favorite = filters.BooleanFilter(method="filter_is_favorite")
 
     class Meta:
         model = Listing
         fields: list[str] = []
+
+    def filter_is_favorite(self, queryset: Any, name: str, value: bool) -> Any:
+        user = self.request.user
+        favorited = queryset.filter(favorited_by__user=user)
+        return favorited if value else queryset.exclude(pk__in=favorited)
 
 
 class CandidateViewSet(viewsets.ModelViewSet):
     serializer_class = CandidateSerializer
     permission_classes = [IsAuthenticated]
     filterset_class = CandidateFilter
-    ordering_fields = ["price_cash", "mileage_km", "created_at", "archived_at"]
+    ordering_fields = [
+        "price_cash",
+        "mileage_km",
+        "created_at",
+        "archived_at",
+        "vehicle__first_registration_year",
+    ]
     ordering = ["-created_at"]
 
     def get_queryset(self) -> Any:
         return (
             Listing.objects.filter(owner=cast(User, self.request.user))
-            .select_related("vehicle", "seller")
+            .select_related("vehicle", "seller", "source")
             .prefetch_related("favorited_by", "notes")
         )
 
