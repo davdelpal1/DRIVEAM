@@ -9,6 +9,21 @@ y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
 ### Added
 
+- **FASE 5 — Comparador.**
+  - Frontend puro: en "Mis coches" cada tarjeta tiene una casilla "Comparar"; al marcar
+    entre 2 y 5 candidatos, una barra fija enlaza a `/candidatos/comparar?ids=…`.
+  - `/candidatos/comparar`: tabla comparativa (una columna por candidato, primera columna
+    fija en horizontal, scroll en móvil) con precio contado/financiado, año, km, potencia,
+    garantía, Car Score, combustible, vendedor, ubicación, estado y enlace al anuncio. El
+    mejor valor de cada criterio se resalta con su indicador (menor precio, menos km, más
+    nuevo, más potencia, más garantía, mejor score). Los empates y los datos ausentes se
+    tratan explícitamente; si todos coinciden no se destaca nada.
+  - Helpers puros y testeados en `src/features/candidates/comparison.ts`
+    (`COMPARISON_ROWS`, `bestIds`, `parseCompareIds`); tabla en `comparison-table.tsx`.
+  - `consumo` queda fuera: el modelo `Vehicle` aún no tiene ese dato (llega con la FASE 8).
+  - Tests: 8 de `comparison` + 1 de dashboard (selección → enlace de comparar).
+  - ADR `docs/decisions/0010-comparador.md`.
+
 - **FASE 4 — Dashboard "Mis coches".**
   - `Listing.tracking_status` + enum `TrackingStatus` (`nuevo` / `interesado` / `contactado` /
     `visita` / `descartado` / `comprado`): estado de seguimiento personal del candidato,
