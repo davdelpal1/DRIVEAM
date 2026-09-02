@@ -155,6 +155,12 @@ function CandidateCard({
           >
             Editar
           </Link>
+          <Link
+            href={`/candidatos/${candidate.id}/financiacion`}
+            className="rounded-full border border-black/15 px-3 py-1 font-medium hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+          >
+            Financiación
+          </Link>
           <button
             type="button"
             disabled={busy}

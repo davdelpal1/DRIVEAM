@@ -13,7 +13,8 @@ from typing import Any, cast
 
 from django.utils import timezone
 from django_filters import rest_framework as filters
-from rest_framework import serializers, viewsets
+from drf_spectacular.utils import extend_schema
+from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.request import Request
@@ -21,7 +22,12 @@ from rest_framework.response import Response
 
 from apps.accounts.models import User
 from apps.favorites.models import Favorite
-from apps.finance.api import FinanceOfferSerializer
+from apps.finance.api import (
+    FinanceOfferSerializer,
+    FinanceOfferWriteSerializer,
+    breakdown_for_offer,
+)
+from apps.finance.models import FinanceOffer
 from apps.listings import services
 from apps.listings.enums import TrackingStatus
 from apps.listings.models import Listing
@@ -123,6 +129,8 @@ class CandidateSerializer(serializers.Serializer):
         vehicle = instance.vehicle
         user_id = self.context["request"].user.id
         note = next((n for n in instance.notes.all() if n.user_id == user_id), None)
+        offer = next(iter(instance.finance_offers.all()), None)
+        finance_breakdown = breakdown_for_offer(offer) if offer is not None else None
         return {
             "id": instance.id,
             "vehicle_id": vehicle.id,
@@ -144,6 +152,16 @@ class CandidateSerializer(serializers.Serializer):
             "source": instance.source.slug,
             "source_label": instance.source.name,
             "score": None,
+            "finance_total_cost": (
+                self._money(finance_breakdown.total_financed_cost)
+                if finance_breakdown is not None
+                else None
+            ),
+            "finance_difference_vs_cash": (
+                self._money(finance_breakdown.difference_vs_cash)
+                if finance_breakdown is not None
+                else None
+            ),
             "is_favorite": self.get_is_favorite(instance),
             "is_archived": self.get_is_archived(instance),
             "created_at": instance.created_at,
@@ -210,7 +228,7 @@ class CandidateViewSet(viewsets.ModelViewSet):
         return (
             Listing.objects.filter(owner=cast(User, self.request.user))
             .select_related("vehicle", "seller", "source")
-            .prefetch_related("favorited_by", "notes")
+            .prefetch_related("favorited_by", "notes", "finance_offers")
         )
 
     def perform_destroy(self, instance: Listing) -> None:
@@ -229,6 +247,33 @@ class CandidateViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def unarchive(self, request: Request, pk: str | None = None) -> Response:
         return self._set_archived(request, None)
+
+    @extend_schema(
+        request=FinanceOfferWriteSerializer,
+        responses=FinanceOfferSerializer,
+    )
+    @action(detail=True, methods=["get", "put", "delete"], url_path="finance")
+    def finance(self, request: Request, pk: str | None = None) -> Response:
+        """Oferta de financiación del candidato (una por candidato manual) + su desglose."""
+        listing = self.get_object()
+        offer = listing.finance_offers.first()
+
+        if request.method == "GET":
+            if offer is None:
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(FinanceOfferSerializer(offer).data)
+
+        if request.method == "DELETE":
+            if offer is not None:
+                offer.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        write = FinanceOfferWriteSerializer(data=request.data)
+        write.is_valid(raise_exception=True)
+        offer, _ = FinanceOffer.objects.update_or_create(
+            listing=listing, defaults=write.validated_data
+        )
+        return Response(FinanceOfferSerializer(offer).data)
 
     @action(detail=True, methods=["post"])
     def favorite(self, request: Request, pk: str | None = None) -> Response:

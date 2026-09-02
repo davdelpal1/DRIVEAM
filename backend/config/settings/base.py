@@ -152,8 +152,10 @@ REST_FRAMEWORK = {
     # Límite en endpoints sensibles (login/registro). Usa el backend de caché por defecto
     # (`LocMemCache`, por proceso); en producción con varios procesos hará falta caché compartida.
     "DEFAULT_THROTTLE_RATES": {
-        "auth-login": "10/min",
-        "auth-register": "5/hour",
+        "auth-login": env("DJANGO_THROTTLE_AUTH_LOGIN", default="10/min"),
+        # 5/hour es lo adecuado en producción; el desarrollo y la suite E2E (una cuenta nueva
+        # por spec) lo suben vía `.env` (ver `.env.example`).
+        "auth-register": env("DJANGO_THROTTLE_AUTH_REGISTER", default="5/hour"),
     },
 }
 

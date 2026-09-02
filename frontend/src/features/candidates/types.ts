@@ -47,6 +47,10 @@ export interface Candidate {
   source: string;
   source_label: string;
   score: number | null;
+  /** Coste total del coche pagándolo financiado (calculado, FASE 6). `null` sin oferta. */
+  finance_total_cost: string | null;
+  /** Diferencia de ese coste frente al precio al contado. `null` sin oferta o sin contado. */
+  finance_difference_vs_cash: string | null;
   is_favorite: boolean;
   is_archived: boolean;
   created_at: string;
