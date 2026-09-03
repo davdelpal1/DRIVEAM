@@ -21,6 +21,8 @@ import {
   type DashboardFilters,
   type SortKey,
 } from "./dashboard-filters";
+import { ScoreBadge } from "@/features/scoring/score-badge";
+
 import {
   FUEL_TYPE_OPTIONS,
   TRACKING_STATUS_OPTIONS,
@@ -107,10 +109,16 @@ function CandidateCard({
           </span>
         </div>
 
-        <p className="text-zinc-600 dark:text-zinc-400">
-          {meta.length ? meta.join(" · ") : "Sin datos adicionales"}
+        <p className="flex flex-wrap items-baseline gap-x-1.5 text-zinc-600 dark:text-zinc-400">
+          <span>{meta.length ? meta.join(" · ") : "Sin datos adicionales"}</span>
           {" · "}
-          Score {candidate.score ?? "—"}
+          <Link
+            href={`/candidatos/${candidate.id}/score`}
+            className="hover:underline"
+            title={candidate.score_breakdown?.label ?? "Car Score"}
+          >
+            Score <ScoreBadge score={candidate.score} label="" compact />
+          </Link>
           {candidate.is_favorite ? " · ★ favorito" : ""}
           {candidate.is_archived ? " · archivado" : ""}
         </p>
@@ -160,6 +168,12 @@ function CandidateCard({
             className="rounded-full border border-black/15 px-3 py-1 font-medium hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
           >
             Financiación
+          </Link>
+          <Link
+            href={`/candidatos/${candidate.id}/score`}
+            className="rounded-full border border-black/15 px-3 py-1 font-medium hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+          >
+            Score
           </Link>
           <button
             type="button"

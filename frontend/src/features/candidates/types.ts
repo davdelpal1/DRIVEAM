@@ -7,6 +7,8 @@
  * contrato completo es el esquema OpenAPI.
  */
 
+import type { ScoreBreakdown } from "@/features/scoring/types";
+
 export { FUEL_TYPE_OPTIONS } from "@/features/preferences/types";
 
 /** Estados de seguimiento personal del candidato (`backend/apps/listings/enums.py::TrackingStatus`). */
@@ -47,6 +49,8 @@ export interface Candidate {
   source: string;
   source_label: string;
   score: number | null;
+  /** Desglose del Car Score (FASE 7): explica el número. `null` si aún no se ha calculado. */
+  score_breakdown: ScoreBreakdown | null;
   /** Coste total del coche pagándolo financiado (calculado, FASE 6). `null` sin oferta. */
   finance_total_cost: string | null;
   /** Diferencia de ese coste frente al precio al contado. `null` sin oferta o sin contado. */

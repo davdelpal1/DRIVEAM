@@ -25,6 +25,7 @@ const INITIAL: Preference = {
   weight_reliability: 15,
   weight_consumption: 10,
   weight_financing: 10,
+  weight_warranty: 5,
 };
 
 describe("PreferencesForm", () => {

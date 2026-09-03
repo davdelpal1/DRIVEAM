@@ -123,7 +123,8 @@ def test_estado_seguimiento_por_defecto_es_nuevo(user_client: APIClient) -> None
     body = user_client.post(BASE, _payload(), format="json").json()
     assert body["tracking_status"] == "nuevo"
     assert body["source"] == "manual"
-    assert body["score"] is None
+    # El Car Score (FASE 7) se calcula al crear el candidato.
+    assert isinstance(body["score"], int)
 
 
 @pytest.mark.django_db

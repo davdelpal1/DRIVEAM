@@ -23,6 +23,7 @@ def test_get_autocrea_las_preferencias_con_valores_por_defecto(user_client: APIC
     assert response.status_code == 200
     body = response.json()
     assert body["weight_price"] == 25
+    assert body["weight_warranty"] == 5
     assert body["budget_max"] is None
     assert body["fuel_types"] == []
     assert UserPreference.objects.count() == 1

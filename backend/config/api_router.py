@@ -1,10 +1,12 @@
 """Router central de la API v1.
 
 Cada app de dominio registra aquí sus viewsets. Los modelos con dueño (favoritos, notas,
-preferencias, score) y las capturas de anuncio se registrarán en su fase correspondiente
-(FASES 2, 3, 7 y 9). Desde la FASE 6 la financiación se gestiona por candidato en
+preferencias) y las capturas de anuncio se registran en su fase correspondiente
+(FASES 2, 3 y 9). Desde la FASE 6 la financiación se gestiona por candidato en
 `CandidateViewSet` (`/candidates/{id}/finance/`) y la calculadora sin estado vive en
-`config.urls` (`/finance/calculate/`).
+`config.urls` (`/finance/calculate/`). Desde la FASE 7 el Car Score se persiste en el modelo
+`Score` y se expone dentro de `CandidateSerializer` (`score` + `score_breakdown`), sin
+endpoint propio.
 """
 
 from rest_framework.routers import DefaultRouter
