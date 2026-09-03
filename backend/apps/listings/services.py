@@ -62,6 +62,13 @@ def _sync_seller(source: Source, name: str) -> Seller | None:
     return seller
 
 
+def _recalculate_score(listing: Listing, owner: User) -> None:
+    """Recalcula el Car Score del candidato tras crearlo o editarlo (import diferido)."""
+    from apps.scoring.services import recalculate_score
+
+    recalculate_score(listing=listing, user=owner)
+
+
 def _sync_note(*, owner: User, listing: Listing, text: str | None) -> None:
     if text is None:
         return
@@ -90,6 +97,7 @@ def create_candidate(*, owner: User, data: dict[str, Any]) -> Listing:
         **_split(data, _LISTING_FIELDS),
     )
     _sync_note(owner=owner, listing=listing, text=data.get("notes"))
+    _recalculate_score(listing, owner)
     return listing
 
 
@@ -112,6 +120,7 @@ def update_candidate(listing: Listing, data: dict[str, Any]) -> Listing:
         listing.save(update_fields=list(listing_patch))
 
     _sync_note(owner=listing.owner, listing=listing, text=data.get("notes"))
+    _recalculate_score(listing, listing.owner)
     return listing
 
 

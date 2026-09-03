@@ -9,6 +9,31 @@ y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
 ### Added
 
+- **FASE 7 — Car Score V1.**
+  - `apps/scoring/engine.py`: motor puro y determinista `compute_score(inputs, weights) ->
+    ScoreBreakdown` (`Decimal`, sin redondeo intermedio, entero final `ROUND_HALF_UP`;
+    versión `v1`). Factores: precio, kilómetros, antigüedad, financiación y garantía. Cada
+    factor se puntúa contra las preferencias del usuario (`budget_target`/`budget_max`,
+    `min_year`, `max_mileage`) con curva de reserva; un factor sin dato no cuenta como `0`
+    (se excluye y su peso se redistribuye). `consumo` y `fiabilidad` quedan en `missing`.
+  - `apps/scoring/services.py`: puente Django que persiste el `Score` (`update_or_create`
+    por `listing`+`user`+`version`). Recálculo disparado al crear/editar el candidato, al
+    guardar/borrar la financiación y al cambiar las preferencias; red de seguridad en la
+    primera lectura.
+  - `UserPreference.weight_warranty` (migración `accounts/0004`, `default=5`), expuesto en
+    `/api/v1/preferences/` y en el formulario de preferencias.
+  - `CandidateSerializer` rellena `score` y añade `score_breakdown` (el desglose guardado);
+    la fila "Car Score" del comparador deja de ser un marcador.
+  - Frontend: feature `src/features/scoring` (`score-format.ts` puro y testeado,
+    `ScoreBadge`, `ScoreBreakdownPanel`) y página `/candidatos/[id]/score` con la
+    explicación por factores. Enlaces desde la tarjeta del dashboard y la ficha.
+  - Tests: 7 de `engine` (cifras exactas por factor, normalización de pesos, factor
+    ausente, dos perfiles de pesos → rankings distintos) + 4 de API (score persistido al
+    crear, recálculo al cambiar preferencias, factor financiación al guardar oferta,
+    aislamiento por usuario) + 3 de frontend (`score-format`) + E2E
+    `frontend/e2e/score.spec.ts` (los pesos del usuario cambian la puntuación y la banda).
+  - ADR `docs/decisions/0012-car-score-v1.md`.
+
 - **FASE 6 — Calculadora de financiación.**
   - `apps/finance/calculator.py`: función pura y determinista `compute_breakdown(...)` con
     `Decimal` (sin redondeo intermedio; cuantización final `ROUND_HALF_UP`). Devuelve

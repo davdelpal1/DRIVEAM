@@ -6,6 +6,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Estado del proyecto
 
+**FASE 7 completada.** Car Score V1. Motor puro y determinista en
+`backend/apps/scoring/engine.py` (`compute_score(inputs, weights) → ScoreBreakdown`, todo
+`Decimal`, sin redondeo intermedio, entero final `ROUND_HALF_UP`; versión `SCORE_VERSION =
+"v1"`). Factores: **precio, kilómetros, antigüedad, financiación, garantía** — cada uno
+puntuado 0-100 contra las preferencias del usuario (`budget_target`/`budget_max`, `min_year`,
+`max_mileage`) con curva de reserva si la preferencia no está; un factor sin dato se **excluye
+del reparto** (su peso se redistribuye), nunca cuenta `0`; un precio sin ninguna referencia de
+presupuesto no se puntúa. `consumo` (sin dato hasta FASE 8) y `fiabilidad` (sin fuente fiable)
+quedan en `missing`. `apps/scoring/services.py` es el puente Django: **persiste** en el modelo
+`Score` (`update_or_create` por `listing`+`user`+`version`) y recalcula al crear/editar el
+candidato, al guardar/borrar la financiación y al cambiar las preferencias (red de seguridad en
+la primera lectura sin fila). Nuevo `UserPreference.weight_warranty` (migración `accounts/0004`,
+`default=5`). `CandidateSerializer` rellena `score` y añade `score_breakdown`; el comparador
+estrena la fila "Car Score" real. Frontend: feature `src/features/scoring` (`score-format.ts`
+puro y testeado, `ScoreBadge`, `ScoreBreakdownPanel`) y página `/candidatos/[id]/score`; badge
+y enlace desde la tarjeta del dashboard y la ficha.
+Tests obligatorios en `apps/scoring/tests/`. Ver `docs/decisions/0012`.
+
 **FASE 6 completada.** Calculadora de financiación. Backend: cálculo puro y determinista en
 `backend/apps/finance/calculator.py` (`compute_breakdown` → `FinanceBreakdown`, todo
 `Decimal`, sin redondeo intermedio, `ROUND_HALF_UP` final; la ausencia de un dato deja la
@@ -55,10 +73,12 @@ transacción; fuente sintética `manual`). Frontend: `/candidatos/nuevo`,
 Playwright (job `e2e` en CI). Arranque: `cp .env.example .env` && `docker compose up --build`.
 Remoto: `github.com/davdelpal1/DRIVEAM`.
 
-**Siguiente:** FASE 7 de [PLAN.md](PLAN.md) — Car Score V1: reglas deterministas con pesos
-configurables (precio, km, año, financiación, garantía), score 0–100 y `breakdown` que
-explica el número; versión del algoritmo. Rellena el `score` que hoy es `null` en
-`CandidateSerializer`.
+**Siguiente:** FASE 8 de [PLAN.md](PLAN.md) — Importación mediante URL: `SourceAdapter` base +
+registry + URL matcher, endpoint `POST /api/v1/listings/import/` con **prevención SSRF
+obligatoria** y errores estructurados, y un primer adaptador para una fuente legalmente apta
+(parser + fixtures HTML + tests + `docs/data-sources/<fuente>.md`). Los datos importados se
+muestran para revisión antes de guardarse. Trae el dato de `consumo` que la FASE 7 dejó
+pendiente en el Car Score.
 
 Los cuatro documentos que son fuente de verdad, en orden de lectura:
 

@@ -11,6 +11,7 @@ acciones para archivar y marcar favorito. La lógica vive en `apps.listings.serv
 
 from typing import Any, cast
 
+from django.db.models import Prefetch
 from django.utils import timezone
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import extend_schema
@@ -31,6 +32,9 @@ from apps.finance.models import FinanceOffer
 from apps.listings import services
 from apps.listings.enums import TrackingStatus
 from apps.listings.models import Listing
+from apps.scoring.engine import SCORE_VERSION
+from apps.scoring.models import Score
+from apps.scoring.services import recalculate_score
 from apps.sources.api import SellerSerializer, SourceSerializer
 from apps.vehicles.api import VehicleSerializer
 from apps.vehicles.enums import FuelType
@@ -125,12 +129,28 @@ class CandidateSerializer(serializers.Serializer):
     def _money(value: Any) -> str | None:
         return None if value is None else f"{value:.2f}"
 
+    def _score_row(self, instance: Listing) -> Score | None:
+        user = self.context["request"].user
+        row = next(
+            (
+                s
+                for s in instance.scores.all()
+                if s.user_id == user.id and s.version == SCORE_VERSION
+            ),
+            None,
+        )
+        if row is None:
+            # Red de seguridad: candidato sin Car Score todavía (dato antiguo). Lo calcula y guarda.
+            row = recalculate_score(listing=instance, user=user)
+        return row
+
     def to_representation(self, instance: Listing) -> dict[str, Any]:
         vehicle = instance.vehicle
         user_id = self.context["request"].user.id
         note = next((n for n in instance.notes.all() if n.user_id == user_id), None)
         offer = next(iter(instance.finance_offers.all()), None)
         finance_breakdown = breakdown_for_offer(offer) if offer is not None else None
+        score_row = self._score_row(instance)
         return {
             "id": instance.id,
             "vehicle_id": vehicle.id,
@@ -151,7 +171,8 @@ class CandidateSerializer(serializers.Serializer):
             "tracking_status": instance.tracking_status,
             "source": instance.source.slug,
             "source_label": instance.source.name,
-            "score": None,
+            "score": score_row.score if score_row is not None else None,
+            "score_breakdown": score_row.breakdown if score_row is not None else None,
             "finance_total_cost": (
                 self._money(finance_breakdown.total_financed_cost)
                 if finance_breakdown is not None
@@ -228,7 +249,17 @@ class CandidateViewSet(viewsets.ModelViewSet):
         return (
             Listing.objects.filter(owner=cast(User, self.request.user))
             .select_related("vehicle", "seller", "source")
-            .prefetch_related("favorited_by", "notes", "finance_offers")
+            .prefetch_related(
+                "favorited_by",
+                "notes",
+                "finance_offers",
+                Prefetch(
+                    "scores",
+                    queryset=Score.objects.filter(
+                        user=cast(User, self.request.user), version=SCORE_VERSION
+                    ),
+                ),
+            )
         )
 
     def perform_destroy(self, instance: Listing) -> None:
@@ -266,6 +297,7 @@ class CandidateViewSet(viewsets.ModelViewSet):
         if request.method == "DELETE":
             if offer is not None:
                 offer.delete()
+            recalculate_score(listing=listing, user=cast(User, request.user), offer=None)
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         write = FinanceOfferWriteSerializer(data=request.data)
@@ -273,6 +305,7 @@ class CandidateViewSet(viewsets.ModelViewSet):
         offer, _ = FinanceOffer.objects.update_or_create(
             listing=listing, defaults=write.validated_data
         )
+        recalculate_score(listing=listing, user=cast(User, request.user), offer=offer)
         return Response(FinanceOfferSerializer(offer).data)
 
     @action(detail=True, methods=["post"])

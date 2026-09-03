@@ -418,21 +418,21 @@ Ordenar candidatos según las preferencias del usuario.
 
 ### Factores
 
-- [ ] precio.
-- [ ] kilómetros.
-- [ ] año.
-- [ ] consumo.
-- [ ] financiación.
-- [ ] garantía.
+- [x] precio. _(contra `budget_target`/`budget_max`; sin presupuesto no se puntúa)_
+- [x] kilómetros. _(contra `max_mileage` + curva de reserva)_
+- [x] año. _(antigüedad respecto al año en curso; penaliza bajo `min_year`)_
+- [ ] consumo. _(aplazado: `Vehicle` no tiene el dato; llega con la FASE 8)_
+- [x] financiación. _(sobrecoste financiado frente al contado)_
+- [x] garantía. _(meses de garantía; peso nuevo `weight_warranty`)_
 
-Fiabilidad se añadirá solo cuando dispongamos de una fuente de datos fiable.
+Fiabilidad se añadirá solo cuando dispongamos de una fuente de datos fiable (queda en `missing`).
 
 ### Reglas
 
-- [ ] pesos configurables.
-- [ ] score 0-100.
-- [ ] breakdown.
-- [ ] versión del algoritmo.
+- [x] pesos configurables. _(`UserPreference.weight_*`; el motor los normaliza sobre los factores con dato)_
+- [x] score 0-100.
+- [x] breakdown. _(resumen + fila por factor con su cifra concreta)_
+- [x] versión del algoritmo. _(`SCORE_VERSION = "v1"`)_
 
 ### UI
 
@@ -450,9 +450,22 @@ Antigüedad    83
 Financiación  74
 ```
 
+- [x] implementada. _(`/candidatos/[id]/score`: `ScoreBadge` + `ScoreBreakdownPanel`; badge en la tarjeta del dashboard)_
+
 ### Definición de terminado
 
 Dos usuarios con prioridades distintas pueden obtener rankings distintos.
+
+**FASE 7 completada.** Motor puro y determinista en `backend/apps/scoring/engine.py`
+(`compute_score` → `ScoreBreakdown`, `Decimal`, versión `v1`). Factores precio/km/antigüedad/
+financiación/garantía puntuados contra las preferencias del usuario con curva de reserva; un
+factor sin dato se excluye del reparto (nunca cuenta `0`). `apps/scoring/services.py` persiste
+el `Score` (`update_or_create` por `listing`+`user`+`version`) y lo recalcula al editar el
+candidato, la financiación o las preferencias. Nuevo `UserPreference.weight_warranty`
+(migración `accounts/0004`). `CandidateSerializer` rellena `score` y añade `score_breakdown`;
+el comparador estrena la fila real. Frontend: feature `src/features/scoring` + página
+`/candidatos/[id]/score`. Tests obligatorios en `apps/scoring/tests/` + E2E
+`frontend/e2e/score.spec.ts`. Ver `docs/decisions/0012`.
 
 ---
 

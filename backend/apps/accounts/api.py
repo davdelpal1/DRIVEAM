@@ -5,7 +5,7 @@ token CSRF en ``GET /api/v1/auth/csrf/`` y lo envía en la cabecera ``X-CSRFToke
 peticiones que modifican estado. Ver `docs/decisions/0007-autenticacion-y-sesion.md`.
 """
 
-from typing import Any
+from typing import Any, cast
 
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model, login, logout
@@ -21,6 +21,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
+from apps.accounts.models import User as UserModel
 from apps.accounts.models import UserPreference
 
 User = get_user_model()
@@ -34,6 +35,7 @@ WEIGHT_FIELDS = (
     "weight_reliability",
     "weight_consumption",
     "weight_financing",
+    "weight_warranty",
 )
 
 
@@ -171,3 +173,10 @@ class UserPreferenceView(RetrieveUpdateAPIView):
     def get_object(self) -> UserPreference:
         preference, _ = UserPreference.objects.get_or_create(user=self.request.user)
         return preference
+
+    def perform_update(self, serializer: Any) -> None:
+        super().perform_update(serializer)
+        # Los pesos y umbrales cambian el Car Score de todos los candidatos del usuario.
+        from apps.scoring.services import recalculate_for_user
+
+        recalculate_for_user(cast(UserModel, self.request.user))

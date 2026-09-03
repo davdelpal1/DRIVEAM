@@ -25,6 +25,7 @@ function candidate(overrides: Partial<Candidate> = {}): Candidate {
     source: "manual",
     source_label: "Entrada manual",
     score: null,
+    score_breakdown: null,
     finance_total_cost: null,
     finance_difference_vs_cash: null,
     is_favorite: false,

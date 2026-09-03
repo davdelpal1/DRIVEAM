@@ -18,6 +18,7 @@ export interface Preference {
   weight_reliability: number;
   weight_consumption: number;
   weight_financing: number;
+  weight_warranty: number;
 }
 
 /** Payload de actualización: cualquier subconjunto de campos editables. */
@@ -44,6 +45,7 @@ export const WEIGHT_KEYS = [
   "weight_reliability",
   "weight_consumption",
   "weight_financing",
+  "weight_warranty",
 ] as const;
 
 export type WeightKey = (typeof WEIGHT_KEYS)[number];
@@ -55,4 +57,5 @@ export const WEIGHT_FIELDS: ReadonlyArray<{ key: WeightKey; label: string }> = [
   { key: "weight_reliability", label: "Fiabilidad" },
   { key: "weight_consumption", label: "Consumo" },
   { key: "weight_financing", label: "Financiación" },
+  { key: "weight_warranty", label: "Garantía" },
 ];

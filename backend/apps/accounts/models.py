@@ -109,6 +109,7 @@ class UserPreference(TimestampedModel):
     weight_reliability = models.PositiveSmallIntegerField("peso · fiabilidad", default=15)
     weight_consumption = models.PositiveSmallIntegerField("peso · consumo", default=10)
     weight_financing = models.PositiveSmallIntegerField("peso · financiación", default=10)
+    weight_warranty = models.PositiveSmallIntegerField("peso · garantía", default=5)
 
     class Meta:
         db_table = "accounts_user_preference"

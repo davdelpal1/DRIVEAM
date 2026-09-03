@@ -18,3 +18,4 @@ Formato: ver [`template.md`](template.md) — Contexto / Decisión / Alternativa
 | [0009](0009-dashboard-mis-coches.md) | Dashboard "Mis coches" (FASE 4) | aceptada |
 | [0010](0010-comparador.md) | Comparador de candidatos (FASE 5) | aceptada |
 | [0011](0011-calculadora-financiacion.md) | Calculadora de financiación (FASE 6) | aceptada |
+| [0012](0012-car-score-v1.md) | Car Score V1 (FASE 7) | aceptada |

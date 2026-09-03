@@ -16,6 +16,7 @@ const BASE: Preference = {
   weight_reliability: 15,
   weight_consumption: 5,
   weight_financing: 5,
+  weight_warranty: 5,
 };
 
 describe("fromPreference / toPayload", () => {
@@ -33,6 +34,7 @@ describe("fromPreference / toPayload", () => {
       weight_reliability: 15,
       weight_consumption: 5,
       weight_financing: 5,
+      weight_warranty: 5,
     });
   });
 
