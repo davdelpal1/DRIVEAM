@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { Container } from "@/components/container";
+import { PageHeader } from "@/components/ui/page-header";
 import { CandidateForm } from "@/features/candidates/candidate-form";
 import type { Candidate } from "@/features/candidates/types";
 import { serverApiGet } from "@/lib/server-api";
@@ -24,22 +26,22 @@ export default async function EditarCandidatoPage({
   if (!candidate) notFound();
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-6 py-16">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-3xl font-semibold tracking-tight">
-          Editar candidato
-        </h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
-          {candidate.make} {candidate.model} ·{" "}
-          <Link
-            href={`/candidatos/${candidate.id}/financiacion`}
-            className="underline underline-offset-4"
-          >
-            Calcular financiación
-          </Link>
-        </p>
-      </header>
+    <Container>
+      <PageHeader
+        title="Editar candidato"
+        description={
+          <>
+            {candidate.make} {candidate.model} ·{" "}
+            <Link
+              href={`/candidatos/${candidate.id}/financiacion`}
+              className="font-medium text-primary hover:underline"
+            >
+              Calcular financiación
+            </Link>
+          </>
+        }
+      />
       <CandidateForm initialCandidate={candidate} />
-    </main>
+    </Container>
   );
 }

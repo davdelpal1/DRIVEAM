@@ -1,5 +1,6 @@
 import { apiFetch } from "@/lib/api";
-import { cn } from "@/lib/cn";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 
 interface HealthResponse {
   status: string;
@@ -55,27 +56,25 @@ export async function StackStatus() {
   const indicators = await loadIndicators();
 
   return (
-    <ul className="w-full divide-y divide-black/10 rounded-xl border border-black/10 dark:divide-white/10 dark:border-white/15">
-      {indicators.map((indicator) => (
-        <li
-          key={indicator.label}
-          className="flex items-center justify-between gap-4 px-4 py-3"
-        >
-          <div className="flex items-center gap-3">
-            <span
-              aria-hidden
-              className={cn(
-                "size-2.5 rounded-full",
-                indicator.ok ? "bg-green-500" : "bg-red-500",
-              )}
-            />
+    <Card>
+      <ul className="divide-y divide-border">
+        {indicators.map((indicator) => (
+          <li
+            key={indicator.label}
+            className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
+          >
             <span className="font-medium">{indicator.label}</span>
-          </div>
-          <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400">
-            {indicator.ok ? "OK" : "ERROR"} · {indicator.detail}
-          </span>
-        </li>
-      ))}
-    </ul>
+            <span className="flex items-center gap-2">
+              <span className="font-mono text-xs text-subtle">
+                {indicator.detail}
+              </span>
+              <Badge variant={indicator.ok ? "success" : "danger"}>
+                {indicator.ok ? "OK" : "ERROR"}
+              </Badge>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </Card>
   );
 }

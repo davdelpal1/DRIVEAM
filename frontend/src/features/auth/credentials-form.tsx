@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
 import { useAuth } from "./auth-provider";
@@ -76,19 +78,9 @@ export function CredentialsForm({ mode }: { mode: Mode }) {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
-      {generalError && (
-        <p
-          role="alert"
-          className="rounded-lg border border-red-500/40 bg-red-500/5 px-3 py-2 text-sm text-red-700 dark:text-red-400"
-        >
-          {generalError}
-        </p>
-      )}
+      {generalError && <Alert tone="danger">{generalError}</Alert>}
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-sm font-medium">
-          Email
-        </label>
+      <Field label="Email" htmlFor="email" error={emailError}>
         <Input
           id="email"
           name="email"
@@ -98,20 +90,9 @@ export function CredentialsForm({ mode }: { mode: Mode }) {
           aria-invalid={emailError ? true : undefined}
           aria-describedby={emailError ? "email-error" : undefined}
         />
-        {emailError && (
-          <p
-            id="email-error"
-            className="text-sm text-red-600 dark:text-red-400"
-          >
-            {emailError}
-          </p>
-        )}
-      </div>
+      </Field>
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="password" className="text-sm font-medium">
-          Contraseña
-        </label>
+      <Field label="Contraseña" htmlFor="password" error={passwordError}>
         <Input
           id="password"
           name="password"
@@ -122,23 +103,15 @@ export function CredentialsForm({ mode }: { mode: Mode }) {
           aria-invalid={passwordError ? true : undefined}
           aria-describedby={passwordError ? "password-error" : undefined}
         />
-        {passwordError && (
-          <p
-            id="password-error"
-            className="text-sm text-red-600 dark:text-red-400"
-          >
-            {passwordError}
-          </p>
-        )}
-      </div>
+      </Field>
 
       <Button type="submit" disabled={pending} className="w-full">
         {pending ? copy.pending : copy.submit}
       </Button>
 
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="text-sm text-muted">
         {copy.alt}{" "}
-        <Link href={copy.altHref} className="underline underline-offset-4">
+        <Link href={copy.altHref} className="font-medium text-primary hover:underline">
           {copy.altLabel}
         </Link>
       </p>

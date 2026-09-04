@@ -3,8 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Card, CardBody } from "@/components/ui/card";
+import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import type { Candidate } from "@/features/candidates/types";
 import { ApiError } from "@/lib/api";
 
@@ -130,52 +134,51 @@ export function FinanceForm({
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_20rem]">
+    <div className="grid gap-6 lg:grid-cols-[1fr_20rem] lg:items-start">
       <form
         onSubmit={(event) => {
           event.preventDefault();
           void handleSave();
         }}
         noValidate
-        className="flex flex-col gap-4"
+        className="flex flex-col gap-5"
       >
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Precio al contado del anuncio:{" "}
-          <strong>{eur(values.price_cash || null)}</strong>. Introduce las
-          condiciones de la financiación tal y como se anuncian; los importes
-          vacíos no cuentan.
-        </p>
+        <Card>
+          <CardBody className="flex flex-col gap-4">
+            <p className="text-sm text-muted">
+              Precio al contado del anuncio:{" "}
+              <strong className="tnum text-fg">{eur(values.price_cash || null)}</strong>.
+              Introduce las condiciones de la financiación tal y como se
+              anuncian; los importes vacíos no cuentan.
+            </p>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          {NUMBER_FIELDS.map(({ key, label, step }) => (
-            <label
-              key={key}
-              className="flex flex-col gap-1.5 text-sm font-medium"
-            >
-              {label}
-              <Input
-                type="number"
-                min={0}
-                step={step}
-                inputMode={step ? "decimal" : "numeric"}
-                value={values[key]}
-                onChange={(event) => update(key, event.target.value)}
+            <div className="grid gap-4 sm:grid-cols-2">
+              {NUMBER_FIELDS.map(({ key, label, step }) => (
+                <Field key={key} label={label}>
+                  <Input
+                    type="number"
+                    min={0}
+                    step={step}
+                    inputMode={step ? "decimal" : "numeric"}
+                    value={values[key]}
+                    onChange={(event) => update(key, event.target.value)}
+                  />
+                </Field>
+              ))}
+            </div>
+
+            <Field label="Texto original de la oferta (opcional)">
+              <Textarea
+                className="min-h-20"
+                value={values.source_text}
+                onChange={(event) => update("source_text", event.target.value)}
+                placeholder="189 €/mes en 96 cuotas, TIN 6,95%, TAE 9,32%…"
               />
-            </label>
-          ))}
-        </div>
+            </Field>
+          </CardBody>
+        </Card>
 
-        <label className="flex flex-col gap-1.5 text-sm font-medium">
-          Texto original de la oferta (opcional)
-          <textarea
-            className="min-h-20 w-full rounded-lg border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/20"
-            value={values.source_text}
-            onChange={(event) => update("source_text", event.target.value)}
-            placeholder="189 €/mes en 96 cuotas, TIN 6,95%, TAE 9,32%…"
-          />
-        </label>
-
-        <div className="flex flex-wrap items-center gap-4 border-t border-black/10 pt-4 dark:border-white/10">
+        <div className="flex flex-wrap items-center gap-3">
           <Button type="submit" disabled={saving}>
             {saving ? "Guardando…" : "Guardar financiación"}
           </Button>
@@ -196,15 +199,11 @@ export function FinanceForm({
           >
             Volver
           </Button>
-          {error && (
-            <p role="alert" className="text-sm text-red-700 dark:text-red-400">
-              {error}
-            </p>
-          )}
+          {error && <Alert tone="danger">{error}</Alert>}
         </div>
       </form>
 
-      <aside className="flex flex-col gap-3">
+      <aside className="flex flex-col gap-3 lg:sticky lg:top-20">
         <h2 className="text-sm font-semibold">Coste real</h2>
         <FinanceBreakdownPanel breakdown={breakdown} />
       </aside>

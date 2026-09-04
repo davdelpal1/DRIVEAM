@@ -19,8 +19,8 @@ export function ScoreBadge({
   if (compact) {
     return (
       <span className="inline-flex items-baseline gap-1">
-        <span className={`font-semibold tabular-nums ${tone}`}>{value}</span>
-        <span className="text-xs text-zinc-500 dark:text-zinc-400">/100</span>
+        <span className={`tnum font-semibold ${tone}`}>{value}</span>
+        <span className="text-xs text-subtle">/100</span>
       </span>
     );
   }
@@ -28,10 +28,8 @@ export function ScoreBadge({
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-baseline gap-2">
-        <span className={`text-4xl font-semibold tabular-nums ${tone}`}>
-          {value}
-        </span>
-        <span className="text-lg text-zinc-500 dark:text-zinc-400">/ 100</span>
+        <span className={`tnum text-5xl font-semibold ${tone}`}>{value}</span>
+        <span className="text-lg text-subtle">/ 100</span>
       </div>
       <p className={`text-sm font-medium ${tone}`}>{label}</p>
     </div>
