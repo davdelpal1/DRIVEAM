@@ -13,6 +13,7 @@ export interface CandidateFormValues {
   fuel_type: string;
   power_cv: string;
   year: string;
+  fuel_consumption: string;
   mileage_km: string;
   price_cash: string;
   price_financed: string;
@@ -30,6 +31,7 @@ export const EMPTY_CANDIDATE: CandidateFormValues = {
   fuel_type: "desconocido",
   power_cv: "",
   year: "",
+  fuel_consumption: "",
   mileage_km: "",
   price_cash: "",
   price_financed: "",
@@ -50,6 +52,7 @@ export function fromCandidate(candidate: Candidate): CandidateFormValues {
     fuel_type: candidate.fuel_type || "desconocido",
     power_cv: text(candidate.power_cv),
     year: text(candidate.year),
+    fuel_consumption: text(candidate.fuel_consumption),
     mileage_km: text(candidate.mileage_km),
     price_cash: text(candidate.price_cash),
     price_financed: text(candidate.price_financed),
@@ -58,6 +61,36 @@ export function fromCandidate(candidate: Candidate): CandidateFormValues {
     location: candidate.location,
     url: candidate.url,
     notes: candidate.notes,
+  };
+}
+
+/**
+ * Datos importados de una URL (FASE 8) → valores del formulario. La API de importación
+ * devuelve ya la forma de `CandidateInput` (números y decimales como cadena, `null` para lo
+ * ausente); aquí solo se pasa todo a cadenas para los `<input>`.
+ */
+export function fromCandidateInput(
+  input: Partial<CandidateInput>,
+): CandidateFormValues {
+  const text = (value: string | number | null | undefined): string =>
+    value === null || value === undefined ? "" : String(value);
+  return {
+    ...EMPTY_CANDIDATE,
+    make: text(input.make),
+    model: text(input.model),
+    version: text(input.version),
+    fuel_type: input.fuel_type || "desconocido",
+    power_cv: text(input.power_cv),
+    year: text(input.year),
+    fuel_consumption: text(input.fuel_consumption),
+    mileage_km: text(input.mileage_km),
+    price_cash: text(input.price_cash),
+    price_financed: text(input.price_financed),
+    seller_name: text(input.seller_name),
+    warranty_months: text(input.warranty_months),
+    location: text(input.location),
+    url: text(input.url),
+    notes: text(input.notes),
   };
 }
 
@@ -82,6 +115,7 @@ export function toPayload(values: CandidateFormValues): CandidateInput {
     fuel_type: values.fuel_type,
     power_cv: intOrNull(values.power_cv),
     year: intOrNull(values.year),
+    fuel_consumption: decimalOrNull(values.fuel_consumption),
     mileage_km: intOrNull(values.mileage_km),
     price_cash: decimalOrNull(values.price_cash),
     price_financed: decimalOrNull(values.price_financed),

@@ -9,6 +9,48 @@ y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
 ### Added
 
+- **FASE 8 — Importación por URL.**
+  - Patrón Source Adapter en `apps/sources/adapters/`: `base.py` (`SourceAdapter` ABC +
+    `RawListing`), `errors.py` (jerarquía `ImportError` con `code` estable y `status_code`),
+    `ssrf.py` (`validate_public_url`: solo `http(s)`, sin credenciales, puertos restringidos,
+    el host debe resolver solo a IP pública; redirecciones revalidadas; metadatos de la nube
+    `169.254.169.254` bloqueados), `fetch.py` (timeout, tamaño máximo, `Content-Type`),
+    `normalize.py` (normalizadores puros: precio es-ES, año, combustible, kW→CV, consumo),
+    `registry.py` (`AdapterRegistry` + `import_listing()`).
+  - Primer adaptador `datos-estructurados` (`structured_data.py`): lee JSON-LD de schema.org
+    (`Vehicle`/`Car`/`Product`) y Open Graph de cualquier URL `http(s)`. `parse()` pura, con
+    fixtures HTML. No apunta a ningún portal concreto (portales → FASE 13).
+  - `POST /api/v1/listings/import/` (`ListingImportView`, autenticado, throttle
+    `listings-import`): **no persiste**; devuelve `{source, source_url, title, warnings, raw,
+    candidate}`. Errores estructurados `{code, detail}` (400 `unsafe_url`, 422
+    `source_not_supported`/`unparseable_listing`, 502 `unfetchable_url`).
+  - `CandidateSerializer` gana `import_url` (write-only); si viene,
+    `apps/listings/services.create_candidate` usa la fuente `datos-estructurados` y guarda
+    `{import_url, imported_at}` en `Listing.raw_data`. Sin modelo ni migración nuevos en
+    `listings`.
+  - `Vehicle.fuel_consumption` (L/100 km, `Decimal`; migración `vehicles/0002`). El motor
+    del Car Score estrena el factor `consumption` (peso `weight_consumption`, curva de
+    reserva ≤4/≥9); `Consumo` sale de `DEFERRED_FACTORS`. El comparador estrena la fila
+    "Consumo medio".
+  - Ajustes: `DJANGO_THROTTLE_LISTINGS_IMPORT` (`30/hour`), `DJANGO_IMPORT_ALLOW_PRIVATE_HOSTS`
+    (`False` en producción; relaja la comprobación de IP para dev/E2E).
+  - Frontend: feature `src/features/import` (`api.ts`, `import-wizard.tsx`), página
+    `/candidatos/importar` (pegar enlace → previsualización con avisos → `CandidateForm`
+    precargado → guardar). `CandidateForm` acepta `initialValues`/`importUrl`;
+    `fromCandidateInput` en `form-payload.ts`. Enlaces desde el dashboard, el alta manual y
+    el estado vacío. Campo "Consumo medio" en el formulario de candidato.
+  - Tests: parser (fixtures JSON-LD y Open Graph), normalizadores, SSRF (URLs peligrosas y
+    DNS a IP interna), registry y `apps/listings/tests/test_import_api.py`; nuevo caso de
+    consumo en `apps/scoring/tests/test_engine.py`; E2E `frontend/e2e/import.spec.ts`.
+  - ADR `docs/decisions/0013-importacion-por-url.md` y ficha
+    `docs/data-sources/datos-estructurados.md`.
+
+- **Utilidades de demostración (solo desarrollo).**
+  - `python manage.py seed_demo`: crea `demo@driveam.test` con preferencias y 5 candidatos
+    realistas (Car Score, consumo, financiación, notas; uno importado por URL).
+  - `frontend/scripts/demo-navegador.mjs` (`npm run demo`): recorre el MVP completo en un
+    navegador real (Chrome/Edge) con narración superpuesta.
+
 - **FASE 7 — Car Score V1.**
   - `apps/scoring/engine.py`: motor puro y determinista `compute_score(inputs, weights) ->
     ScoreBreakdown` (`Decimal`, sin redondeo intermedio, entero final `ROUND_HALF_UP`;

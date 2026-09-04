@@ -62,6 +62,7 @@ def score_breakdown_for(listing: Listing, user: User, *, offer: Any = _LOOKUP) -
         mileage_km=listing.mileage_km,
         year=listing.vehicle.first_registration_year,
         warranty_months=listing.warranty_months,
+        fuel_consumption=listing.vehicle.fuel_consumption,
         finance_difference_vs_cash=difference_vs_cash,
         budget_target=preference.budget_target,
         budget_max=preference.budget_max,
@@ -72,6 +73,7 @@ def score_breakdown_for(listing: Listing, user: User, *, offer: Any = _LOOKUP) -
         price=preference.weight_price,
         mileage=preference.weight_mileage,
         age=preference.weight_age,
+        consumption=preference.weight_consumption,
         financing=preference.weight_financing,
         warranty=preference.weight_warranty,
     )

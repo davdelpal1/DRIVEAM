@@ -40,6 +40,15 @@ class Vehicle(TimestampedModel):
     engine_displacement = models.PositiveIntegerField("cilindrada (cc)", null=True, blank=True)
     power_kw = models.PositiveIntegerField("potencia (kW)", null=True, blank=True)
     power_cv = models.PositiveIntegerField("potencia (CV)", null=True, blank=True)
+    fuel_consumption = models.DecimalField(
+        "consumo medio (L/100 km)",
+        max_digits=4,
+        decimal_places=1,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+        help_text="Consumo medio combinado; llega con la importación por URL (FASE 8).",
+    )
     doors = models.PositiveSmallIntegerField("puertas", null=True, blank=True)
     seats = models.PositiveSmallIntegerField("plazas", null=True, blank=True)
     first_registration_year = models.PositiveSmallIntegerField(

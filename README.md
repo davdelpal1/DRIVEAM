@@ -110,19 +110,21 @@ El MVP inicial debe permitir:
 
 - [x] autenticación;
 - [x] crear un perfil de preferencias;
-- [ ] añadir un coche manualmente;
-- [ ] importar un vehículo mediante URL cuando exista un adaptador compatible;
-- [ ] editar los datos importados;
-- [ ] guardar vehículos como favoritos;
-- [ ] añadir notas personales;
-- [ ] ver el detalle de un vehículo;
-- [ ] comparar entre 2 y 5 candidatos;
-- [ ] registrar precio al contado;
-- [ ] registrar información de financiación;
-- [ ] calcular el coste total aproximado de una financiación;
-- [ ] mantener la URL original del anuncio;
-- [ ] identificar la fuente y el vendedor;
-- [ ] mostrar un score inicial basado en reglas sencillas.
+- [x] añadir un coche manualmente;
+- [x] importar un vehículo mediante URL cuando exista un adaptador compatible;
+- [x] editar los datos importados;
+- [x] guardar vehículos como favoritos;
+- [x] añadir notas personales;
+- [x] ver el detalle de un vehículo;
+- [x] comparar entre 2 y 5 candidatos;
+- [x] registrar precio al contado;
+- [x] registrar información de financiación;
+- [x] calcular el coste total aproximado de una financiación;
+- [x] mantener la URL original del anuncio;
+- [x] identificar la fuente y el vendedor;
+- [x] mostrar un score inicial basado en reglas sencillas.
+
+El MVP personal (FASES 0–8 de [`PLAN.md`](./PLAN.md)) está completo.
 
 ### Fuera del MVP
 
@@ -241,6 +243,56 @@ Si el puerto 3000 u 8000 está ocupado, ajusta `FRONTEND_PORT` / `BACKEND_PORT` 
 docker compose run --rm backend python manage.py createsuperuser   # usuario admin (pide email)
 docker compose run --rm backend python manage.py migrate           # migraciones
 ```
+
+## Recorrido de demostración
+
+Para ver el MVP funcionando de principio a fin sin tener que introducir nada a mano.
+
+### 1. Sembrar datos de ejemplo
+
+```bash
+docker compose exec backend python manage.py seed_demo
+```
+
+Crea (y recrea en cada ejecución) el usuario **`demo@driveam.test` / `driveam-demo-2026`** con:
+
+- preferencias de compra (presupuesto objetivo 15.000 € / máximo 18.000 €, año mínimo 2018,
+  máximo 120.000 km, prioridades del Car Score);
+- **5 candidatos** realistas (VW Golf, SEAT León, Toyota Corolla, Kia Ceed, Renault Mégane)
+  con Car Score calculado, consumo, estados de seguimiento, favoritos, notas y —en dos de
+  ellos— una oferta de financiación. El Golf está marcado como **importado por URL** (fuente
+  `datos-estructurados`).
+
+Solo para desarrollo; no usar en producción.
+
+### 2. Recorrido guiado en el navegador
+
+Abre una ventana real de Chrome (o Edge), inicia sesión con la cuenta de demo y recorre solo
+las 7 etapas del MVP con un rótulo que va narrando cada paso:
+
+```bash
+cd frontend
+npm run demo                  # Chrome
+BROWSER=msedge npm run demo    # Microsoft Edge
+SPEED=1000 npm run demo        # ms entre acciones (por defecto 700; menor = más rápido)
+```
+
+Requiere el stack levantado (`docker compose up`) y Node en el host (script:
+`frontend/scripts/demo-navegador.mjs`).
+
+| Etapa | Qué muestra |
+|---|---|
+| 1 · Inicio de sesión | Login con `demo@driveam.test`. |
+| 2 · Preferencias | `/perfil`: criterios de compra y pesos del Car Score; sube el peso del *Precio* y guarda. |
+| 3 · Mis coches | Dashboard: cambia el estado de seguimiento de un candidato y prueba un filtro. |
+| 4 · Car Score | Desglose del Golf factor a factor (precio, km, antigüedad, **consumo**, garantía) con el motivo de cada nota. |
+| 5 · Comparador | Selecciona 3 coches y abre la tabla comparativa (mejor valor resaltado por criterio). |
+| 6 · Financiación | Cambia cuota y nº de cuotas del León y ve el coste total recalcularse en vivo. |
+| 7 · Importar por URL | Pega un enlace, revisa los datos leídos de la página y guarda el candidato. |
+
+> La descarga de la web externa de la etapa 7 está **simulada** dentro del script (respuesta
+> fija) para que el recorrido sea siempre idéntico y no dependa de internet; el guardado sí es
+> real. El script borra el coche importado de la ejecución anterior antes de empezar.
 
 ## Tests y calidad
 
@@ -369,12 +421,15 @@ Añadir:
 
 ## 10. Estado
 
-**Estado actual:** FASE 2 completada — autenticación por sesión (email + contraseña), perfil de
-preferencias de compra (`/api/v1/preferences/`) y páginas `/registro`, `/entrar` y `/perfil` en el
-frontend. Sobre la FASE 1 (modelo de dominio + API del catálogo) y la FASE 0 (monorepo, Docker
-Compose, CI). Ver ADR `docs/decisions/0007`.
+**Estado actual:** FASE 8 completada — importación por URL (patrón Source Adapter + primer
+adaptador de datos estructurados, endpoint con prevención de SSRF) y el dato de consumo en el
+Car Score. Con ella se cierra el MVP personal (FASES 0–8): autenticación, preferencias, alta
+manual y por URL, favoritos, notas, dashboard, comparador, calculadora de financiación y Car
+Score V1. Ver `CHANGELOG.md` y ADRs `docs/decisions/0001`–`0013`.
 
-**Siguiente:** FASE 3 — añadir un vehículo manualmente (sustituir la hoja de cálculo).
+**Siguiente:** parar y evaluar el producto con una búsqueda real de coche antes de continuar
+la hoja de ruta (FASE 9 — historial de anuncios — si se sigue). Ver
+[`PLAN.md`](./PLAN.md).
 
 Siguiente documento: [`PLAN.md`](./PLAN.md)
 

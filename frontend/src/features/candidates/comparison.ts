@@ -6,8 +6,6 @@
  * filas de comparación y el cálculo de "quién gana en cada criterio" son puros y testeables;
  * la presentación vive en `comparison-table.tsx`.
  *
- * `consumo` queda fuera: el modelo `Vehicle` todavía no tiene ese dato (llegará con la
- * importación por URL de la FASE 8).
  */
 
 import {
@@ -89,6 +87,18 @@ export const COMPARISON_ROWS: readonly ComparisonRow[] = [
     value: (c) => c.mileage_km,
     format: (c) =>
       c.mileage_km === null ? "—" : `${decimal.format(c.mileage_km)} km`,
+  },
+  {
+    key: "fuel_consumption",
+    label: "Consumo medio",
+    best: "min",
+    badge: "Menor consumo",
+    value: (c) =>
+      c.fuel_consumption === null ? null : Number(c.fuel_consumption),
+    format: (c) =>
+      c.fuel_consumption === null
+        ? "—"
+        : `${decimal.format(Number(c.fuel_consumption))} L/100 km`,
   },
   {
     key: "power_cv",

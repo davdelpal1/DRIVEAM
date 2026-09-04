@@ -1,15 +1,15 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { CandidateForm } from "@/features/candidates/candidate-form";
+import { ImportWizard } from "@/features/import/import-wizard";
 import { getCurrentUser } from "@/lib/server-auth";
 
 export const metadata = {
-  title: "Nuevo candidato · DRIVEAM",
-  description: "Añade un coche a mano.",
+  title: "Importar por URL · DRIVEAM",
+  description: "Añade un candidato pegando el enlace de un anuncio.",
 };
 
-export default async function NuevoCandidatoPage() {
+export default async function ImportarPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/entrar");
 
@@ -17,21 +17,21 @@ export default async function NuevoCandidatoPage() {
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-6 py-16">
       <header className="flex flex-col gap-2">
         <h1 className="text-3xl font-semibold tracking-tight">
-          Nuevo candidato
+          Importar por URL
         </h1>
         <p className="text-zinc-600 dark:text-zinc-400">
-          Solo marca y modelo son obligatorios. Lo demás lo puedes completar
-          luego. ¿Tienes el enlace del anuncio?{" "}
+          Pega el enlace de un anuncio y DRIVEAM intentará rellenar los datos
+          por ti. Podrás revisarlos antes de guardar. ¿Prefieres teclearlos?{" "}
           <Link
-            href="/candidatos/importar"
+            href="/candidatos/nuevo"
             className="underline underline-offset-4"
           >
-            Impórtalo por URL
+            Alta manual
           </Link>
           .
         </p>
       </header>
-      <CandidateForm />
+      <ImportWizard />
     </main>
   );
 }

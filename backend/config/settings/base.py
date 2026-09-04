@@ -156,8 +156,17 @@ REST_FRAMEWORK = {
         # 5/hour es lo adecuado en producción; el desarrollo y la suite E2E (una cuenta nueva
         # por spec) lo suben vía `.env` (ver `.env.example`).
         "auth-register": env("DJANGO_THROTTLE_AUTH_REGISTER", default="5/hour"),
+        # Importación por URL (FASE 8): descarga páginas externas, conviene un límite holgado.
+        "listings-import": env("DJANGO_THROTTLE_LISTINGS_IMPORT", default="30/hour"),
     },
 }
+
+# ------------------------------------------------------------------
+# Importación por URL (FASE 8) — prevención de SSRF
+# ------------------------------------------------------------------
+# En True se omite la comprobación de rango de IP del host (solo desarrollo / E2E, que
+# apuntan a un servidor de fixtures local). En producción SIEMPRE False.
+IMPORT_ALLOW_PRIVATE_HOSTS = env.bool("DJANGO_IMPORT_ALLOW_PRIVATE_HOSTS", default=False)
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "DRIVEAM API",

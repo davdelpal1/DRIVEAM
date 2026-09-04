@@ -46,12 +46,22 @@ function Fieldset({
 
 export function CandidateForm({
   initialCandidate,
+  initialValues,
+  importUrl,
+  submitLabel,
 }: {
   initialCandidate?: Candidate;
+  /** Valores de arranque (p. ej. los datos importados de una URL, FASE 8). */
+  initialValues?: CandidateFormValues;
+  /** Si viene, el alta se marca como importada (fija la fuente en el backend). */
+  importUrl?: string;
+  submitLabel?: string;
 }) {
   const router = useRouter();
-  const [values, setValues] = useState<CandidateFormValues>(() =>
-    initialCandidate ? fromCandidate(initialCandidate) : EMPTY_CANDIDATE,
+  const [values, setValues] = useState<CandidateFormValues>(
+    () =>
+      initialValues ??
+      (initialCandidate ? fromCandidate(initialCandidate) : EMPTY_CANDIDATE),
   );
   const [status, setStatus] = useState<Status>({ kind: "idle" });
 
@@ -68,7 +78,9 @@ export function CandidateForm({
       if (initialCandidate) {
         await updateCandidate(initialCandidate.id, payload);
       } else {
-        await createCandidate(payload);
+        await createCandidate(
+          importUrl ? { ...payload, import_url: importUrl } : payload,
+        );
       }
       router.push("/candidatos");
       router.refresh();
@@ -148,6 +160,18 @@ export function CandidateForm({
               inputMode="numeric"
               value={values.year}
               onChange={(event) => update({ year: event.target.value })}
+            />
+          </Field>
+          <Field label="Consumo medio (L/100 km)">
+            <Input
+              type="number"
+              min={0}
+              step="0.1"
+              inputMode="decimal"
+              value={values.fuel_consumption}
+              onChange={(event) =>
+                update({ fuel_consumption: event.target.value })
+              }
             />
           </Field>
         </div>
@@ -234,9 +258,8 @@ export function CandidateForm({
         <Button type="submit" disabled={saving}>
           {saving
             ? "Guardando…"
-            : initialCandidate
-              ? "Guardar cambios"
-              : "Añadir candidato"}
+            : (submitLabel ??
+              (initialCandidate ? "Guardar cambios" : "Añadir candidato"))}
         </Button>
         <Button
           type="button"

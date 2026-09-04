@@ -13,7 +13,9 @@ from apps.scoring.engine import (
     compute_score,
 )
 
-DEFAULT_WEIGHTS = ScoreWeights(price=25, mileage=20, age=15, financing=10, warranty=5)
+DEFAULT_WEIGHTS = ScoreWeights(
+    price=25, mileage=20, age=15, consumption=10, financing=10, warranty=5
+)
 
 
 def _d(value: str) -> Decimal:
@@ -86,8 +88,10 @@ def test_pesos_distintos_invierten_el_ranking() -> None:
         budget_target=_d("13000.00"),
         budget_max=_d("16000.00"),
     )
-    solo_precio = ScoreWeights(price=100, mileage=0, age=0, financing=0, warranty=0)
-    solo_antiguedad = ScoreWeights(price=0, mileage=0, age=100, financing=0, warranty=0)
+    solo_precio = ScoreWeights(price=100, mileage=0, age=0, consumption=0, financing=0, warranty=0)
+    solo_antiguedad = ScoreWeights(
+        price=0, mileage=0, age=100, consumption=0, financing=0, warranty=0
+    )
 
     a1 = compute_score(inputs=barato_viejo, weights=solo_precio).score
     b1 = compute_score(inputs=caro_nuevo, weights=solo_precio).score
@@ -113,6 +117,24 @@ def test_curva_de_garantia() -> None:
     assert warranty(12) == 60
     assert warranty(24) == 90
     assert warranty(36) == 100
+
+
+def test_curva_de_consumo() -> None:
+    def consumo(value: str) -> int:
+        bd = compute_score(
+            inputs=ScoreInputs(reference_year=2026, fuel_consumption=Decimal(value)),
+            weights=DEFAULT_WEIGHTS,
+        )
+        assert bd.score is not None
+        return bd.score
+
+    assert consumo("4.0") == 100
+    assert consumo("6.5") == 50
+    assert consumo("9.0") == 0
+    # Sin dato de consumo, el factor no cuenta (no puntúa 0).
+    bd = compute_score(inputs=ScoreInputs(reference_year=2026), weights=DEFAULT_WEIGHTS)
+    assert bd.score is None
+    assert "Consumo" in bd.missing
 
 
 def test_factor_financiacion_por_sobrecoste() -> None:

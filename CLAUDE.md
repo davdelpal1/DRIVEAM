@@ -6,6 +6,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Estado del proyecto
 
+**FASE 8 completada.** Importación por URL. Patrón Source Adapter real en
+`backend/apps/sources/adapters/`: `base.py` (`SourceAdapter` ABC + `RawListing`), `errors.py`
+(jerarquía `ImportError` con `code` estable + `status_code`), `ssrf.py`
+(`validate_public_url`: esquema/puertos/credenciales + DNS **solo a IP pública**, redirecciones
+revalidadas; `settings.IMPORT_ALLOW_PRIVATE_HOSTS` lo relaja solo en dev/E2E), `fetch.py`
+(timeout, tamaño máx., `Content-Type`), `normalize.py` (normalizadores **puros**), `registry.py`
+(`AdapterRegistry` + `import_listing()` = validar→descargar→parsear) y `structured_data.py`
+(primer adaptador: JSON-LD schema.org `Vehicle`/`Car`/`Product` + Open Graph de cualquier URL
+`http(s)`; `parse()` pura, fixtures en `tests/fixtures/`). No apunta a ningún portal concreto
+(decisión legal conservadora; portales → FASE 13). Endpoint `POST /api/v1/listings/import/`
+(`ListingImportView`, autenticado, throttle `listings-import`) **no persiste**: devuelve
+`{source, source_url, title, warnings, raw, candidate}`; errores `{code, detail}` con
+400/422/502. Guardar reutiliza `POST /api/v1/candidates/`: `CandidateSerializer` gana
+`import_url` (write-only) y `apps/listings/services.create_candidate` usa entonces la fuente
+`datos-estructurados` + guarda `{import_url, imported_at}` en `Listing.raw_data`. Nuevo
+`Vehicle.fuel_consumption` (L/100 km, migración `vehicles/0002`): el motor del Car Score estrena
+el factor `consumption` (peso `weight_consumption`, curva de reserva ≤4/≥9; sale de
+`DEFERRED_FACTORS`, solo queda `Fiabilidad`) y el comparador la fila "Consumo medio". Frontend:
+feature `src/features/import` (`api.ts`, `import-wizard.tsx`), página `/candidatos/importar`,
+`CandidateForm` acepta `initialValues`+`importUrl`, `fromCandidateInput` en `form-payload.ts`,
+enlaces desde dashboard/alta manual/estado vacío. Tests en `apps/sources/adapters/tests/` +
+`apps/listings/tests/test_import_api.py` + E2E `frontend/e2e/import.spec.ts`. Ver
+`docs/decisions/0013` y `docs/data-sources/datos-estructurados.md`.
+
 **FASE 7 completada.** Car Score V1. Motor puro y determinista en
 `backend/apps/scoring/engine.py` (`compute_score(inputs, weights) → ScoreBreakdown`, todo
 `Decimal`, sin redondeo intermedio, entero final `ROUND_HALF_UP`; versión `SCORE_VERSION =
@@ -73,12 +97,9 @@ transacción; fuente sintética `manual`). Frontend: `/candidatos/nuevo`,
 Playwright (job `e2e` en CI). Arranque: `cp .env.example .env` && `docker compose up --build`.
 Remoto: `github.com/davdelpal1/DRIVEAM`.
 
-**Siguiente:** FASE 8 de [PLAN.md](PLAN.md) — Importación mediante URL: `SourceAdapter` base +
-registry + URL matcher, endpoint `POST /api/v1/listings/import/` con **prevención SSRF
-obligatoria** y errores estructurados, y un primer adaptador para una fuente legalmente apta
-(parser + fixtures HTML + tests + `docs/data-sources/<fuente>.md`). Los datos importados se
-muestran para revisión antes de guardarse. Trae el dato de `consumo` que la FASE 7 dejó
-pendiente en el Car Score.
+**Siguiente:** el MVP personal (FASES 0–8) está completo. Según la disciplina de hoja de ruta
+(PLAN.md), **parar y evaluar el producto con una búsqueda real de coche** antes de seguir. La
+FASE 9 (Historial: `ListingSnapshot`, gráfico de precio) es la siguiente si se continúa.
 
 Los cuatro documentos que son fuente de verdad, en orden de lectura:
 

@@ -13,6 +13,7 @@ function candidate(overrides: Partial<Candidate> = {}): Candidate {
     fuel_type: "gasolina",
     power_cv: 150,
     year: 2020,
+    fuel_consumption: null,
     mileage_km: 50000,
     price_cash: "18000.00",
     price_financed: null,

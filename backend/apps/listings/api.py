@@ -20,6 +20,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
+from rest_framework.views import APIView
 
 from apps.accounts.models import User
 from apps.favorites.models import Favorite
@@ -35,6 +37,7 @@ from apps.listings.models import Listing
 from apps.scoring.engine import SCORE_VERSION
 from apps.scoring.models import Score
 from apps.scoring.services import recalculate_score
+from apps.sources.adapters import ListingImportError, import_listing
 from apps.sources.api import SellerSerializer, SourceSerializer
 from apps.vehicles.api import VehicleSerializer
 from apps.vehicles.enums import FuelType
@@ -95,6 +98,9 @@ class CandidateSerializer(serializers.Serializer):
     )
     power_cv = serializers.IntegerField(min_value=0, required=False, allow_null=True)
     year = serializers.IntegerField(min_value=1900, max_value=2100, required=False, allow_null=True)
+    fuel_consumption = serializers.DecimalField(
+        max_digits=4, decimal_places=1, min_value=0, required=False, allow_null=True
+    )
 
     mileage_km = serializers.IntegerField(min_value=0, required=False, allow_null=True)
     price_cash = serializers.DecimalField(
@@ -109,6 +115,11 @@ class CandidateSerializer(serializers.Serializer):
     warranty_months = serializers.IntegerField(min_value=0, required=False, allow_null=True)
     location = serializers.CharField(max_length=120, required=False, allow_blank=True, default="")
     url = serializers.URLField(max_length=500, required=False, allow_blank=True, default="")
+    # Cuando el candidato se da de alta desde la importación por URL (FASE 8): marca la fuente
+    # como `datos-estructurados` y guarda la procedencia en `Listing.raw_data`.
+    import_url = serializers.URLField(
+        max_length=500, required=False, allow_blank=True, default="", write_only=True
+    )
     notes = serializers.CharField(required=False, allow_blank=True, default="")
     tracking_status = serializers.ChoiceField(
         choices=TrackingStatus.choices, required=False, default=TrackingStatus.NEW
@@ -160,6 +171,9 @@ class CandidateSerializer(serializers.Serializer):
             "fuel_type": vehicle.fuel_type,
             "power_cv": vehicle.power_cv,
             "year": vehicle.first_registration_year,
+            "fuel_consumption": (
+                None if vehicle.fuel_consumption is None else f"{vehicle.fuel_consumption:.1f}"
+            ),
             "mileage_km": instance.mileage_km,
             "price_cash": self._money(instance.price_cash),
             "price_financed": self._money(instance.price_financed),
@@ -191,6 +205,8 @@ class CandidateSerializer(serializers.Serializer):
     def _to_service_data(self, validated: dict[str, Any]) -> dict[str, Any]:
         """Renombra las claves de formulario a las de los modelos que espera el servicio."""
         data = dict(validated)
+        if not data.get("import_url"):
+            data.pop("import_url", None)
         if "year" in data:
             data["first_registration_year"] = data.pop("year")
         if "location" in data:
@@ -319,3 +335,45 @@ class CandidateViewSet(viewsets.ModelViewSet):
         listing = self.get_object()
         Favorite.objects.filter(user=cast(User, request.user), listing=listing).delete()
         return Response(self.get_serializer(self.get_queryset().get(pk=listing.pk)).data)
+
+
+# --- Importación por URL (FASE 8) ----------------------------------------------------
+
+
+class ListingImportRequestSerializer(serializers.Serializer):
+    url = serializers.URLField(max_length=2000)
+
+
+class ListingImportView(APIView):
+    """`POST /api/v1/listings/import/` — lee una URL y devuelve un candidato **para revisar**.
+
+    No persiste nada: el usuario revisa/corrige y luego guarda con `POST /api/v1/candidates/`
+    (enviando `import_url` para conservar la procedencia). Errores estructurados:
+    `{"code": ..., "detail": ...}` con 4xx/502 según el fallo.
+    """
+
+    permission_classes = [IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "listings-import"
+
+    @extend_schema(request=ListingImportRequestSerializer, responses=None)
+    def post(self, request: Request) -> Response:
+        payload = ListingImportRequestSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        url = payload.validated_data["url"]
+
+        try:
+            adapter, raw = import_listing(url)
+        except ListingImportError as exc:
+            return Response({"code": exc.code, "detail": exc.detail}, status=exc.status_code)
+
+        return Response(
+            {
+                "source": {"slug": adapter.slug, "name": adapter.source_defaults.get("name", "")},
+                "source_url": raw.source_url,
+                "title": raw.title,
+                "warnings": raw.warnings,
+                "raw": raw.raw,
+                "candidate": {**raw.to_candidate_payload(), "import_url": raw.source_url},
+            }
+        )
