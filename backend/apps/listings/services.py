@@ -11,6 +11,7 @@ from __future__ import annotations
 from typing import Any
 
 from django.db import transaction
+from django.utils import timezone
 
 from apps.accounts.models import User
 from apps.favorites.models import UserVehicleNote
@@ -20,9 +21,18 @@ from apps.sources.models import Seller, Source
 from apps.vehicles.models import Vehicle
 
 _MANUAL_SOURCE_SLUG = "manual"
+_IMPORT_SOURCE_SLUG = "datos-estructurados"
 
 # Campos que viajan planos en el payload del candidato y a qué modelo pertenecen.
-_VEHICLE_FIELDS = ("make", "model", "version", "fuel_type", "power_cv", "first_registration_year")
+_VEHICLE_FIELDS = (
+    "make",
+    "model",
+    "version",
+    "fuel_type",
+    "power_cv",
+    "first_registration_year",
+    "fuel_consumption",
+)
 _LISTING_FIELDS = (
     "mileage_km",
     "price_cash",
@@ -41,6 +51,18 @@ def get_manual_source() -> Source:
         defaults={
             "name": "Entrada manual",
             "integration_type": IntegrationType.MANUAL,
+        },
+    )
+    return source
+
+
+def get_import_source() -> Source:
+    """Fuente de los candidatos añadidos con la importación por URL (FASE 8)."""
+    source, _ = Source.objects.get_or_create(
+        slug=_IMPORT_SOURCE_SLUG,
+        defaults={
+            "name": "Datos estructurados (schema.org)",
+            "integration_type": IntegrationType.USER_IMPORT,
         },
     )
     return source
@@ -87,13 +109,20 @@ def _sync_note(*, owner: User, listing: Listing, text: str | None) -> None:
 
 @transaction.atomic
 def create_candidate(*, owner: User, data: dict[str, Any]) -> Listing:
-    source = get_manual_source()
+    import_url = (data.get("import_url") or "").strip()
+    source = get_import_source() if import_url else get_manual_source()
+    if import_url and not data.get("url"):
+        data = {**data, "url": import_url}
+    raw_data = (
+        {"import_url": import_url, "imported_at": timezone.now().isoformat()} if import_url else {}
+    )
     vehicle = Vehicle.objects.create(**_split(data, _VEHICLE_FIELDS))
     listing = Listing.objects.create(
         owner=owner,
         vehicle=vehicle,
         source=source,
         seller=_sync_seller(source, data.get("seller_name", "")),
+        raw_data=raw_data,
         **_split(data, _LISTING_FIELDS),
     )
     _sync_note(owner=owner, listing=listing, text=data.get("notes"))

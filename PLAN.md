@@ -332,7 +332,7 @@ Comparar entre 2 y 5 coches.
 - [x] año.
 - [x] kilómetros.
 - [x] potencia.
-- [ ] consumo. _(aplazado: `Vehicle` no tiene el dato; llega con la FASE 8)_
+- [x] consumo. _(FASE 8: `Vehicle.fuel_consumption`; fila "Consumo medio" en el comparador)_
 - [x] financiación. _(fila "Precio financiado"; cálculos completos en la FASE 6)_
 - [x] garantía.
 - [x] vendedor.
@@ -421,7 +421,7 @@ Ordenar candidatos según las preferencias del usuario.
 - [x] precio. _(contra `budget_target`/`budget_max`; sin presupuesto no se puntúa)_
 - [x] kilómetros. _(contra `max_mileage` + curva de reserva)_
 - [x] año. _(antigüedad respecto al año en curso; penaliza bajo `min_year`)_
-- [ ] consumo. _(aplazado: `Vehicle` no tiene el dato; llega con la FASE 8)_
+- [x] consumo. _(FASE 8: factor `consumption` con curva de reserva; peso `weight_consumption`)_
 - [x] financiación. _(sobrecoste financiado frente al contado)_
 - [x] garantía. _(meses de garantía; peso nuevo `weight_warranty`)_
 
@@ -477,40 +477,50 @@ Reducir drásticamente el esfuerzo de introducir un candidato.
 
 ### Backend
 
-- [ ] SourceAdapter base.
-- [ ] Registry.
-- [ ] URL matcher.
-- [ ] endpoint `/listings/import/`.
-- [ ] validación de URL.
-- [ ] prevención SSRF.
-- [ ] errores estructurados.
+- [x] SourceAdapter base. _(`apps/sources/adapters/base.py`: `SourceAdapter` ABC + `RawListing`)_
+- [x] Registry. _(`registry.py`: `AdapterRegistry` + `import_listing()`)_
+- [x] URL matcher. _(`can_handle(url)` por adaptador; el genérico es el último recurso)_
+- [x] endpoint `/listings/import/`. _(`ListingImportView`, autenticado, throttle `listings-import`)_
+- [x] validación de URL. _(`ssrf.validate_public_url`)_
+- [x] prevención SSRF. _(esquema/puertos/credenciales + DNS solo a IP pública + redirecciones revalidadas)_
+- [x] errores estructurados. _(`errors.py`: `code` estable + `detail`; 400/422/502)_
 
 ### Primer adaptador
 
-Elegir únicamente una fuente técnicamente y legalmente adecuada para la fase de prueba.
-
-- [ ] parser.
-- [ ] fixtures HTML.
-- [ ] tests.
-- [ ] documentación de la fuente.
+- [x] parser. _(`structured_data.py`: JSON-LD schema.org + Open Graph; `parse()` pura)_
+- [x] fixtures HTML. _(`apps/sources/adapters/tests/fixtures/`)_
+- [x] tests. _(parser, normalizadores, SSRF, registry, API de importación)_
+- [x] documentación de la fuente. _(`docs/data-sources/datos-estructurados.md`)_
 
 ### UX
 
 ```text
-Pegar enlace
-→ detectar fuente
-→ importar
-→ revisar datos
-→ guardar
+Pegar enlace  →  detectar fuente  →  importar  →  revisar datos  →  guardar
 ```
+
+- [x] `/candidatos/importar` + `src/features/import`. Previsualización con avisos, `CandidateForm`
+  precargado, guardado por el alta normal con `import_url` (fija la fuente).
 
 ### Importante
 
-Los datos importados deben mostrarse para revisión antes de guardarse definitivamente.
+Los datos importados se muestran para revisión antes de guardarse (el endpoint de importación
+no persiste nada).
 
 ### Definición de terminado
 
 El usuario puede añadir un candidato pegando una URL compatible.
+
+**FASE 8 completada.** Patrón Source Adapter en `apps/sources/adapters/` (base + registry +
+SSRF + fetch + normalizadores puros). Primer adaptador `datos-estructurados`: lee JSON-LD de
+schema.org (`Vehicle`/`Car`/`Product`) y Open Graph de cualquier URL `http(s)`, sin apuntar a
+un portal concreto (opción legalmente conservadora; portales concretos → FASE 13). Endpoint
+`POST /api/v1/listings/import/` con SSRF obligatoria y errores `{code, detail}`; **no
+persiste** — el guardado reutiliza `POST /api/v1/candidates/` con `import_url`. Nuevo
+`Vehicle.fuel_consumption` (migración `vehicles/0002`); el Car Score estrena el factor
+`consumo` (deja de estar en `missing`) y el comparador la fila "Consumo medio". Frontend:
+`src/features/import` + `/candidatos/importar`. Tests en `apps/sources/adapters/tests/` +
+`apps/listings/tests/test_import_api.py` + E2E `frontend/e2e/import.spec.ts`. Ver
+`docs/decisions/0013`.
 
 ---
 

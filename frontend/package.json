@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "demo": "node scripts/demo-navegador.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

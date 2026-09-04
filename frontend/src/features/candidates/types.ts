@@ -37,6 +37,8 @@ export interface Candidate {
   fuel_type: string;
   power_cv: number | null;
   year: number | null;
+  /** Consumo medio en L/100 km (llega con la importación por URL, FASE 8). `null` si no hay dato. */
+  fuel_consumption: string | null;
   mileage_km: number | null;
   price_cash: string | null;
   price_financed: string | null;
@@ -68,6 +70,7 @@ export interface CandidateInput {
   fuel_type?: string;
   power_cv?: number | null;
   year?: number | null;
+  fuel_consumption?: string | null;
   mileage_km?: number | null;
   price_cash?: string | null;
   price_financed?: string | null;
@@ -76,4 +79,6 @@ export interface CandidateInput {
   location?: string;
   url?: string;
   notes?: string;
+  /** URL de origen cuando el candidato viene de la importación (FASE 8): fija la fuente. */
+  import_url?: string;
 }

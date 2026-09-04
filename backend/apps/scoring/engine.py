@@ -31,12 +31,14 @@ FACTOR_LABELS: dict[str, str] = {
     "price": "Precio",
     "mileage": "Kilómetros",
     "age": "Antigüedad",
+    "consumption": "Consumo",
     "financing": "Financiación",
     "warranty": "Garantía",
 }
 
 # Factores que la V1 todavía no puntúa (se muestran como pendientes en la interfaz).
-DEFERRED_FACTORS: tuple[str, ...] = ("Consumo", "Fiabilidad")
+# `consumo` se activa en la FASE 8 con la importación por URL; `fiabilidad` sigue sin fuente.
+DEFERRED_FACTORS: tuple[str, ...] = ("Fiabilidad",)
 
 
 @dataclass(frozen=True)
@@ -46,6 +48,7 @@ class ScoreWeights:
     price: int
     mileage: int
     age: int
+    consumption: int
     financing: int
     warranty: int
 
@@ -59,6 +62,7 @@ class ScoreInputs:
     mileage_km: int | None = None
     year: int | None = None
     warranty_months: int | None = None
+    fuel_consumption: Decimal | None = None
     finance_difference_vs_cash: Decimal | None = None
     budget_target: Decimal | None = None
     budget_max: Decimal | None = None
@@ -174,6 +178,23 @@ def _financing_factor(
     return sub, f"financiarlo lo encarece {over}"
 
 
+def _consumption_factor(consumption: Decimal | None) -> tuple[Decimal, str] | None:
+    """Consumo medio (L/100 km). Curva de reserva: <=4 excelente, >=9 penaliza del todo.
+
+    La V1 no tiene consumo objetivo del usuario ni cohortes de mercado (eso es la Score V2),
+    así que se usa una escala absoluta razonable para turismos.
+    """
+    if consumption is None or consumption <= 0:
+        return None
+    label = f"{consumption:.1f} L/100 km".replace(".", ",")
+    if consumption <= 4:
+        return _HUNDRED, f"{label}, consumo muy contenido"
+    if consumption >= 9:
+        return Decimal(0), f"{label}, consumo elevado"
+    sub = _HUNDRED * (Decimal(9) - consumption) / Decimal(5)
+    return sub, label
+
+
 def _warranty_factor(months: int | None) -> tuple[Decimal, str] | None:
     if months is None:
         return None
@@ -221,6 +242,7 @@ def compute_score(*, inputs: ScoreInputs, weights: ScoreWeights) -> ScoreBreakdo
         ("price", price, weights.price),
         ("mileage", _mileage_factor(inputs.mileage_km, inputs.max_mileage), weights.mileage),
         ("age", _age_factor(inputs.year, inputs.reference_year, inputs.min_year), weights.age),
+        ("consumption", _consumption_factor(inputs.fuel_consumption), weights.consumption),
         (
             "financing",
             _financing_factor(inputs.finance_difference_vs_cash, inputs.price_cash),

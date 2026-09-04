@@ -110,7 +110,9 @@ function CandidateCard({
         </div>
 
         <p className="flex flex-wrap items-baseline gap-x-1.5 text-zinc-600 dark:text-zinc-400">
-          <span>{meta.length ? meta.join(" · ") : "Sin datos adicionales"}</span>
+          <span>
+            {meta.length ? meta.join(" · ") : "Sin datos adicionales"}
+          </span>
           {" · "}
           <Link
             href={`/candidatos/${candidate.id}/score`}
@@ -268,6 +270,13 @@ export function CandidateDashboard({
         Todavía no has añadido ningún candidato. Empieza con{" "}
         <Link href="/candidatos/nuevo" className="underline underline-offset-4">
           Nuevo candidato
+        </Link>{" "}
+        o{" "}
+        <Link
+          href="/candidatos/importar"
+          className="underline underline-offset-4"
+        >
+          Importar por URL
         </Link>
         .
       </p>

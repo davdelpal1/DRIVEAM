@@ -29,12 +29,20 @@ export default async function CandidatosPage() {
             estado de seguimiento de cada candidato.
           </p>
         </div>
-        <Link
-          href="/candidatos/nuevo"
-          className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90"
-        >
-          Nuevo candidato
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/candidatos/importar"
+            className="rounded-full border border-black/15 px-4 py-2 text-sm font-medium hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+          >
+            Importar por URL
+          </Link>
+          <Link
+            href="/candidatos/nuevo"
+            className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90"
+          >
+            Nuevo candidato
+          </Link>
+        </div>
       </header>
 
       {page ? (

@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { EMPTY_CANDIDATE, fromCandidate, toPayload } from "./form-payload";
+import {
+  EMPTY_CANDIDATE,
+  fromCandidate,
+  fromCandidateInput,
+  toPayload,
+} from "./form-payload";
 import type { Candidate } from "./types";
 
 const BASE: Candidate = {
@@ -12,6 +17,7 @@ const BASE: Candidate = {
   fuel_type: "gasolina",
   power_cv: 150,
   year: 2021,
+  fuel_consumption: "5.4",
   mileage_km: 42000,
   price_cash: "18500.00",
   price_financed: null,
@@ -41,6 +47,7 @@ describe("fromCandidate / toPayload", () => {
       fuel_type: "gasolina",
       power_cv: 150,
       year: 2021,
+      fuel_consumption: "5.4",
       mileage_km: 42000,
       price_cash: "18500.00",
       price_financed: null,
@@ -52,11 +59,28 @@ describe("fromCandidate / toPayload", () => {
     });
   });
 
+  it("fromCandidateInput pasa a cadenas los datos importados", () => {
+    const values = fromCandidateInput({
+      make: "Volkswagen",
+      model: "Golf",
+      fuel_consumption: "5.4",
+      price_cash: "18990.00",
+      power_cv: 131,
+      year: null,
+    });
+    expect(values.make).toBe("Volkswagen");
+    expect(values.fuel_consumption).toBe("5.4");
+    expect(values.power_cv).toBe("131");
+    expect(values.year).toBe("");
+    expect(toPayload(values).price_cash).toBe("18990.00");
+  });
+
   it("convierte los campos numéricos vacíos en null, nunca en 0", () => {
     const payload = toPayload(EMPTY_CANDIDATE);
 
     expect(payload.power_cv).toBeNull();
     expect(payload.year).toBeNull();
+    expect(payload.fuel_consumption).toBeNull();
     expect(payload.mileage_km).toBeNull();
     expect(payload.price_cash).toBeNull();
     expect(payload.price_financed).toBeNull();

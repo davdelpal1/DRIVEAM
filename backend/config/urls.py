@@ -12,6 +12,7 @@ from drf_spectacular.views import (
 )
 
 from apps.finance.api import FinanceCalculateView
+from apps.listings.api import ListingImportView
 
 api_v1_patterns: list[URLPattern | URLResolver] = [
     path("health/", include("apps.core.urls")),
@@ -20,6 +21,7 @@ api_v1_patterns: list[URLPattern | URLResolver] = [
         FinanceCalculateView.as_view(),
         name="finance-calculate",
     ),
+    path("listings/import/", ListingImportView.as_view(), name="listing-import"),
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "schema/swagger-ui/",
