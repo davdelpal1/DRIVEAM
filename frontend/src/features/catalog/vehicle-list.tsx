@@ -1,3 +1,8 @@
+import { Alert } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+
 import { getListings, getVehicles } from "./api";
 import type { Listing, Vehicle } from "./types";
 
@@ -45,18 +50,20 @@ async function loadCatalog(): Promise<Catalog | { error: string }> {
 
 function ListingRow({ listing }: { listing: Listing }) {
   return (
-    <li className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-4 py-2 text-sm">
+    <li className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-5 py-2.5 text-sm">
       <a
         href={listing.url}
-        className="font-medium underline underline-offset-4"
+        className="font-medium text-primary hover:underline"
         target="_blank"
         rel="noreferrer"
       >
         {listing.source_detail.name}
       </a>
-      <span className="text-zinc-600 dark:text-zinc-400">
-        {formatPrice(listing.price_cash)} · {formatMileage(listing.mileage_km)}
-        {listing.province ? ` · ${listing.province}` : ""} · {listing.status}
+      <span className="flex items-center gap-2 text-muted">
+        <span className="tnum">{formatPrice(listing.price_cash)}</span>
+        <span>· {formatMileage(listing.mileage_km)}</span>
+        {listing.province ? <span>· {listing.province}</span> : null}
+        <Badge>{listing.status}</Badge>
       </span>
     </li>
   );
@@ -70,28 +77,28 @@ function VehicleCard({
   listings: Listing[];
 }) {
   return (
-    <article className="rounded-xl border border-black/10 dark:border-white/15">
-      <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-black/10 px-4 py-3 dark:border-white/10">
-        <h3 className="font-semibold">{vehicle.display_name}</h3>
-        <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400">
+    <Card>
+      <CardHeader>
+        <CardTitle>{vehicle.display_name}</CardTitle>
+        <span className="font-mono text-xs text-subtle">
           {vehicle.fuel_type}
           {vehicle.first_registration_year
             ? ` · ${vehicle.first_registration_year}`
             : ""}
         </span>
-      </header>
+      </CardHeader>
       {listings.length > 0 ? (
-        <ul className="divide-y divide-black/5 dark:divide-white/5">
+        <ul className="divide-y divide-border">
           {listings.map((listing) => (
             <ListingRow key={listing.id} listing={listing} />
           ))}
         </ul>
       ) : (
-        <p className="px-4 py-2 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="px-5 py-3 text-sm text-muted">
           Sin anuncios asociados todavía.
         </p>
       )}
-    </article>
+    </Card>
   );
 }
 
@@ -99,25 +106,21 @@ export async function VehicleList() {
   const catalog = await loadCatalog();
 
   if ("error" in catalog) {
-    return (
-      <p className="rounded-xl border border-red-500/40 bg-red-500/5 px-4 py-3 text-sm text-red-700 dark:text-red-400">
-        No se pudo cargar el catálogo: {catalog.error}
-      </p>
-    );
+    return <Alert tone="danger">No se pudo cargar el catálogo: {catalog.error}</Alert>;
   }
 
   if (catalog.vehicles.length === 0) {
     return (
-      <p className="rounded-xl border border-black/10 px-4 py-8 text-center text-sm text-zinc-500 dark:border-white/15 dark:text-zinc-400">
-        Todavía no hay vehículos. Crea uno desde el{" "}
+      <EmptyState title="Todavía no hay vehículos">
+        Créalo desde el{" "}
         <a
-          className="underline underline-offset-4"
+          className="font-medium text-primary hover:underline"
           href="/api/v1/schema/swagger-ui/"
         >
           panel de la API
         </a>{" "}
         o el admin de Django.
-      </p>
+      </EmptyState>
     );
   }
 

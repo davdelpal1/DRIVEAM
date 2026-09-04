@@ -6,6 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Estado del proyecto
 
+**Rediseño de interfaz completado** (post-FASE 8, antes de evaluar el MVP). Sistema de
+diseño con tokens de color en `frontend/src/app/globals.css` (paleta "automoción, moderno y
+confiable": azul + verde eléctrico, claro/oscuro con toggle manual) y componentes nuevos en
+`frontend/src/components/ui/` (`Card`, `Badge`, `Select`, `Textarea`, `Field`/`Fieldset`,
+`Alert`, `Stat`, `EmptyState`, `PageHeader`) más `Container`, `SiteHeader`/`SiteFooter` y
+`ThemeToggle`. Reskin de todas las pantallas sin tocar lógica de negocio, helpers puros ni
+contratos de API; la home pasa a ser una landing real y el panel de diagnóstico de servicios
+se movió a `/estado`. Ver `docs/decisions/0014-rediseno-ui.md`.
+
 **FASE 8 completada.** Importación por URL. Patrón Source Adapter real en
 `backend/apps/sources/adapters/`: `base.py` (`SourceAdapter` ABC + `RawListing`), `errors.py`
 (jerarquía `ImportError` con `code` estable + `status_code`), `ssrf.py`

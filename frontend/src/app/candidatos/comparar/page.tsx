@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { Container } from "@/components/container";
+import { Alert } from "@/components/ui/alert";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
 import {
   MAX_COMPARE,
   MIN_COMPARE,
@@ -16,9 +20,6 @@ export const metadata = {
   title: "Comparar coches · DRIVEAM",
   description: "Compara entre 2 y 5 candidatos lado a lado.",
 };
-
-const noticeClass =
-  "rounded-xl border border-black/10 px-4 py-8 text-center text-sm text-zinc-500 dark:border-white/15 dark:text-zinc-400";
 
 export default async function CompararPage({
   searchParams,
@@ -38,40 +39,39 @@ export default async function CompararPage({
     .slice(0, MAX_COMPARE);
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-6 py-16">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Comparar coches</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
-          Marca entre {MIN_COMPARE} y {MAX_COMPARE} candidatos en{" "}
-          <Link href="/candidatos" className="underline underline-offset-4">
-            Mis coches
-          </Link>{" "}
-          y compáralos aquí.
-        </p>
-      </header>
+    <Container size="wide">
+      <PageHeader
+        title="Comparar coches"
+        description={
+          <>
+            Marca entre {MIN_COMPARE} y {MAX_COMPARE} candidatos en{" "}
+            <Link href="/candidatos" className="font-medium text-primary hover:underline">
+              Mis coches
+            </Link>{" "}
+            y compáralos aquí.
+          </>
+        }
+      />
 
       {page === null ? (
-        <p className="rounded-xl border border-red-500/40 bg-red-500/5 px-4 py-3 text-sm text-red-700 dark:text-red-400">
+        <Alert tone="danger">
           No se pudieron cargar tus candidatos. Recarga la página.
-        </p>
+        </Alert>
       ) : selected.length < MIN_COMPARE ? (
-        <p className={noticeClass}>
-          Elige al menos {MIN_COMPARE} candidatos para comparar. Vuelve a{" "}
-          <Link href="/candidatos" className="underline underline-offset-4">
+        <EmptyState title={`Elige al menos ${MIN_COMPARE} candidatos para comparar`}>
+          Vuelve a{" "}
+          <Link href="/candidatos" className="font-medium text-primary hover:underline">
             Mis coches
           </Link>{" "}
           y usa las casillas &quot;Comparar&quot; de cada tarjeta.
-        </p>
+        </EmptyState>
       ) : (
         <ComparisonTable candidates={selected} />
       )}
 
-      <Link
-        href="/candidatos"
-        className="text-sm text-zinc-600 underline underline-offset-4 dark:text-zinc-400"
-      >
+      <Link href="/candidatos" className="text-sm font-medium text-primary hover:underline">
         ← Volver a Mis coches
       </Link>
-    </main>
+    </Container>
   );
 }

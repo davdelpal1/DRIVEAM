@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
+import { Container } from "@/components/container";
+import { PageHeader } from "@/components/ui/page-header";
 import type { Candidate } from "@/features/candidates/types";
 import { FinanceForm } from "@/features/finance/finance-form";
 import type { FinanceOffer } from "@/features/finance/types";
@@ -27,21 +29,23 @@ export default async function FinanciacionCandidatoPage({
   const offer = await serverApiGet<FinanceOffer>(`/candidates/${id}/finance/`);
 
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-6 py-16">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-3xl font-semibold tracking-tight">Financiación</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
-          {candidate.make} {candidate.model}
-          {candidate.version ? ` ${candidate.version}` : ""} ·{" "}
-          <Link
-            href={`/candidatos/${candidate.id}/editar`}
-            className="underline underline-offset-4"
-          >
-            Ver ficha
-          </Link>
-        </p>
-      </header>
+    <Container size="wide">
+      <PageHeader
+        title="Financiación"
+        description={
+          <>
+            {candidate.make} {candidate.model}
+            {candidate.version ? ` ${candidate.version}` : ""} ·{" "}
+            <Link
+              href={`/candidatos/${candidate.id}/editar`}
+              className="font-medium text-primary hover:underline"
+            >
+              Ver ficha
+            </Link>
+          </>
+        }
+      />
       <FinanceForm candidate={candidate} initialOffer={offer} />
-    </main>
+    </Container>
   );
 }

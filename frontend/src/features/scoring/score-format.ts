@@ -15,19 +15,19 @@ export function scoreTone(score: number | null): ScoreTone {
 }
 
 const TEXT_CLASS: Record<ScoreTone, string> = {
-  great: "text-emerald-700 dark:text-emerald-400",
-  good: "text-lime-700 dark:text-lime-400",
-  ok: "text-amber-700 dark:text-amber-400",
-  weak: "text-red-700 dark:text-red-400",
-  none: "text-zinc-500 dark:text-zinc-400",
+  great: "text-success",
+  good: "text-accent-fg",
+  ok: "text-warning",
+  weak: "text-danger",
+  none: "text-subtle",
 };
 
 const BAR_CLASS: Record<ScoreTone, string> = {
-  great: "bg-emerald-600 dark:bg-emerald-500",
-  good: "bg-lime-600 dark:bg-lime-500",
-  ok: "bg-amber-500",
-  weak: "bg-red-500",
-  none: "bg-zinc-400",
+  great: "bg-success",
+  good: "bg-accent",
+  ok: "bg-warning",
+  weak: "bg-danger",
+  none: "bg-subtle",
 };
 
 export function scoreTextClass(score: number | null): string {

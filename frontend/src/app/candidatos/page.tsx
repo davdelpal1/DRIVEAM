@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { Container } from "@/components/container";
+import { Alert } from "@/components/ui/alert";
+import { buttonClass } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
 import { CandidateDashboard } from "@/features/candidates/candidate-dashboard";
 import type { Candidate } from "@/features/candidates/types";
 import type { Paginated } from "@/lib/api";
@@ -20,38 +24,32 @@ export default async function CandidatosPage() {
   const page = await serverApiGet<Paginated<Candidate>>("/candidates/");
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-6 py-16">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold tracking-tight">Mis coches</h1>
-          <p className="text-zinc-600 dark:text-zinc-400">
-            Gestiona toda tu búsqueda desde aquí: filtra, ordena y cambia el
-            estado de seguimiento de cada candidato.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href="/candidatos/importar"
-            className="rounded-full border border-black/15 px-4 py-2 text-sm font-medium hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
-          >
-            Importar por URL
-          </Link>
-          <Link
-            href="/candidatos/nuevo"
-            className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background hover:opacity-90"
-          >
-            Nuevo candidato
-          </Link>
-        </div>
-      </header>
+    <Container size="wide">
+      <PageHeader
+        title="Mis coches"
+        description="Gestiona toda tu búsqueda desde aquí: filtra, ordena y cambia el estado de seguimiento de cada candidato."
+        actions={
+          <>
+            <Link
+              href="/candidatos/importar"
+              className={buttonClass({ variant: "secondary" })}
+            >
+              Importar por URL
+            </Link>
+            <Link href="/candidatos/nuevo" className={buttonClass()}>
+              Nuevo candidato
+            </Link>
+          </>
+        }
+      />
 
       {page ? (
         <CandidateDashboard candidates={page.results} />
       ) : (
-        <p className="rounded-xl border border-red-500/40 bg-red-500/5 px-4 py-3 text-sm text-red-700 dark:text-red-400">
+        <Alert tone="danger">
           No se pudieron cargar tus candidatos. Recarga la página.
-        </p>
+        </Alert>
       )}
-    </main>
+    </Container>
   );
 }

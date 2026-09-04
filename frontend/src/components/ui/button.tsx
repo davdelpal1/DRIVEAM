@@ -2,8 +2,13 @@ import type { ButtonHTMLAttributes } from "react";
 
 import { cn } from "@/lib/cn";
 
-type ButtonVariant = "primary" | "secondary" | "ghost";
-type ButtonSize = "sm" | "md" | "lg";
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "ghost"
+  | "danger"
+  | "accent";
+export type ButtonSize = "sm" | "md" | "lg";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -11,22 +16,34 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
-  primary: "bg-foreground text-background hover:opacity-90 disabled:opacity-50",
+  primary:
+    "bg-primary text-primary-fg shadow-sm hover:bg-primary-hover disabled:opacity-50",
   secondary:
-    "border border-black/15 hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10",
-  ghost: "hover:bg-black/5 dark:hover:bg-white/10",
+    "border border-border-strong bg-surface text-fg hover:bg-surface-muted disabled:opacity-50",
+  ghost: "text-muted hover:bg-surface-muted hover:text-fg disabled:opacity-50",
+  danger:
+    "border border-danger/40 text-danger hover:bg-danger-weak disabled:opacity-50",
+  accent:
+    "bg-accent text-accent-fg shadow-sm hover:brightness-105 disabled:opacity-50",
 };
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {
-  sm: "h-8 px-3 text-sm",
+  sm: "h-8 px-3 text-[13px]",
   md: "h-10 px-4 text-sm",
   lg: "h-12 px-6 text-base",
 };
 
-/**
- * Semilla del sistema de componentes. Se ampliará cuando haya pantallas reales
- * (FASE 3 en adelante).
- */
+const BASE =
+  "inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed";
+
+/** Clases del botón reutilizables desde un `<Link>` o `<a>` sin duplicar estilos. */
+export function buttonClass(
+  opts: { variant?: ButtonVariant; size?: ButtonSize; className?: string } = {},
+): string {
+  const { variant = "primary", size = "md", className } = opts;
+  return cn(BASE, VARIANT_CLASSES[variant], SIZE_CLASSES[size], className);
+}
+
 export function Button({
   variant = "primary",
   size = "md",
@@ -37,12 +54,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-full font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed",
-        VARIANT_CLASSES[variant],
-        SIZE_CLASSES[size],
-        className,
-      )}
+      className={buttonClass({ variant, size, className })}
       {...props}
     />
   );
